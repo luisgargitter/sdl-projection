@@ -1,11 +1,10 @@
 
-LIBS = -lm -lSDL2
-CC = gcc
-CFLAGS = -g -Wall
-TARGET = main.o
+LIBS = -lm -lSDL2	# Libraries
+CC = gcc			# Compiler
+CFLAGS = -g -Wall	# -g for debugging, -Wall for warnings
+TARGET = main.o		# Name of the executable
 
-.PHONY: all clean
-
+.PHONY: all clean	
 
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
@@ -15,8 +14,15 @@ HEADERS = $(wildcard *.h)
 
 
 all: $(OBJECTS)
+	echo "Linking..."
 	$(CC) $(OBJECTS) -Wall $(LIBS) -o $(TARGET)
 
+.SILENT:
 clean:
+	echo "Cleaning..."
 	-rm -f *.o
 	-rm -f $(TARGET)
+
+# Check if SDL2 is installed
+check:
+	echo "SDL Version: $(shell sdl2-config --version)"
