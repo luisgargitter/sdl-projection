@@ -73,8 +73,8 @@ int update_verts(PLOTTER_CTX *p, int polc, float *polv) {
 }
 
 int plot(PLOTTER_CTX *p, int polc, float *polv) {
-    SDL_SetRenderDrawColor(p->r, 0, 0, 0, 0);
-    SDL_RenderClear(p->r);
+    SDL_SetRenderDrawColor(p->r, 0, 0, 0, 0); // set color to black for function-call "SDL_RenderClear()"
+    SDL_RenderClear(p->r); // resets the renderers surface with given color (see previous line)
     update_verts(p, polc, polv);
 
     SDL_SetRenderDrawColor(p->r, 255, 255, 255, 255);
