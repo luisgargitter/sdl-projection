@@ -15,7 +15,7 @@ HEADERS = $(wildcard *.h)
 
 
 all: $(OBJECTS)
-	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
+	$(CC) $(OBJECTS) -Wall $(LIBS) -o $(TARGET)
 
 clean:
 	-rm -f *.o
