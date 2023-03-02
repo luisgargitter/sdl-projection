@@ -24,6 +24,8 @@ clean:
 	-rm -f *.o
 	-rm -f $(TARGET)
 
+rebuild: clean all
+
 # Check if SDL2 is installed
 check:
 	echo "SDL Version: $(shell sdl2-config --version)"
