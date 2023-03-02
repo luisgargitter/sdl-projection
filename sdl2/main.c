@@ -7,6 +7,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "types.h"
+
 #define WIDTH 800
 #define HEIGHT 600
 
