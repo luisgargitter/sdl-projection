@@ -15,8 +15,30 @@
 
 #define TITLE "Primitives"
 
-#define ABORT(msg); printf("Fatal SDL Error: %s\n", msg); return EXIT_FAILURE;
+// linear algebra--------------
+void matmult(const float matrix[DIM][DIM], const float vector[DIM], float out[DIM]) {
+    float acc[3] = {0.0, 0.0, 0.0}; 
+        // performancewise not the best option
+        // but dont want to take memory responsibility;
+    for(int i = 0; i < DIM; i++) {
+        for(int j = 0; j < DIM; j++) {
+            acc[i] += matrix[i][j] * vector[j];
+        }
+    }
+    for(int i = 0; i < DIM; i++) {
+        out[i] = acc[i];
+    }
+}
 
+#if DIM == 3 // genrotmap only implemented for 3 dimensions
+void genrotmat(const float angles[DIM], float matrix[DIM][DIM]) {
+
+}
+#endif
+
+
+
+// visualization---------------
 typedef struct {
     SDL_Renderer *r;
     int width;
@@ -95,17 +117,20 @@ void cube_rotate(float *c, float radians[3]) {
 int main(int argc, char **argv) {
     // Initialization
     if(SDL_Init(SDL_INIT_VIDEO ) < 0) {
-        ABORT(SDL_GetError());
+        printf("%s\n", SDL_GetError());
+        return EXIT_FAILURE;
     }
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if(win == NULL) {
-        ABORT(SDL_GetError());
+        printf("%s\n", SDL_GetError());
+        return EXIT_FAILURE;
     }
     
     RENDER_CTX *p = render_ctx_new(win);
     if(p == NULL) {
-        ABORT(SDL_GetError());
+        printf("%s\n", SDL_GetError());
+        return EXIT_FAILURE;
     }
 
     float edgelen = 100.0;
