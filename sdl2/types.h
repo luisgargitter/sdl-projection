@@ -15,7 +15,7 @@ typedef struct
 /**
  * @brief Error
 */
-typedef int Error_t;
+typedef uint16_t Error_t;
 
 #endif
 
