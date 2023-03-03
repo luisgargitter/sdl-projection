@@ -1,7 +1,6 @@
 #ifndef LINAG_H
 #define LINAG_H
 
-#include <cstdint>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -18,9 +17,5 @@
 void matMult(uint32_t m, float** m1, uint32_t n, float** m2, uint32_t r, float** res);
 
 //void genRotMat();
-
-#ifdef LINAG_TEST
-void linag_testall();
-#endif
 
 #endif
