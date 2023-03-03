@@ -19,8 +19,4 @@ void matMult(uint32_t m, float** m1, uint32_t n, float** m2, uint32_t r, float**
 
 //void genRotMat();
 
-#ifdef LINAG_TEST
-void linag_testall();
-#endif
-
 #endif
