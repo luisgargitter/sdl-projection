@@ -1,4 +1,3 @@
-
+# ignore build artifacts
 *.o
-
-sdl2/main
+main
