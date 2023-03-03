@@ -1,13 +1,26 @@
 #ifndef LINAG_H
 #define LINAG_H
 
+#include <cstdint>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <error.h>
+
 #include <math.h>
+
+#define LINAG_TEST
+
 #define DIM 3
 
-typedef struct matrix_t matrix_t;
+void matMult(uint32_t m, float** m1, uint32_t n, float** m2, uint32_t r, float** res);
 
-void matmult(const matrix_t *n1, const matrix_t *n2, matrix_t *res);
+//void genRotMat();
 
-void genRotMat(); 
+#ifdef LINAG_TEST
+void linag_testall();
+#endif
 
 #endif
