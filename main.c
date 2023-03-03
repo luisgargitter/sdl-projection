@@ -9,6 +9,7 @@
 
 #include "types.h"
 #include "linag.h"
+#include "test.h"
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -103,6 +104,10 @@ int main(int argc, char **argv) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
+
+    #ifdef DTEST
+        printf("Unit Test Mode\n");
+    #endif
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if(win == NULL) {

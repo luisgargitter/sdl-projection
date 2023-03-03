@@ -4,7 +4,10 @@ CC = gcc			# Compiler
 CFLAGS = -g -Wall	# -g for debugging, -Wall for warnings
 TARGET = main		# Name of the executable
 
-.PHONY: all clean	
+TEST_LIBS = -lcunit # Libraries needed for the test
+TEST_DEF = -D TEST	# defines needed for the test
+TEST_TARGET = test
+
 
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
 HEADERS = $(wildcard *.h)
@@ -15,7 +18,7 @@ HEADERS = $(wildcard *.h)
 
 all: $(OBJECTS)
 	echo "Linking..."
-	$(CC) $(OBJECTS) -Wall $(LIBS) -o $(TARGET)
+	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $(TARGET)
 
 .SILENT:
 clean:
@@ -23,8 +26,16 @@ clean:
 	-rm -f *.out
 	-rm -f *.o
 	-rm -f $(TARGET)
+	-rm -f $(TEST_TARGET)
 
 rebuild: clean all
+
+test: clean --test
+
+# private target, cannot be called from outside, please call test
+--test: $(OBJECTS)
+	echo "Linking Test..."
+	$(CC) $(TEST_DEF) $(CFLAGS) $(OBJECTS) $(LIBS) $(TEST_LIBS) -o $(TEST_TARGET)
 
 # Check if SDL2 is installed
 check:
