@@ -98,7 +98,6 @@ void cube_rotate(float *c, float radians[3]) {
 }
 
 int main(int argc, char **argv) {
-    linag_testall();
     // Initialization
     if(SDL_Init(SDL_INIT_VIDEO ) < 0) {
         printf("%s\n", SDL_GetError());

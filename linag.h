@@ -1,7 +1,7 @@
 #ifndef LINAG_H
 #define LINAG_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>

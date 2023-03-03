@@ -2,3 +2,5 @@
 *.o
 
 sdl2/main
+
+main
