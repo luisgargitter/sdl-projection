@@ -2,14 +2,12 @@
 #define CUBE_H
 
 #include "types.h"
+#include <stdint.h>
 
-/**
- * @brief Type definition for a cube
- */
-typedef struct
-{
-   
-} cube_t;
-    
+object_t* cubeNew(float edgelen);
+
+void cubeFree(object_t* cube);
+
+void objectMove(object_t* obj, vec_3_t off);
 
 #endif
