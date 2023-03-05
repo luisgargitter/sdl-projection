@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <SDL2/SDL.h>
+#include "Error.h"  // the errors should be available everywhere
+
 /**
  * @brief A 3D vector
 */
@@ -28,10 +30,6 @@ typedef struct {
   int32_t* index_v;
 } object_t;
 
-/**
- * @brief Error
-*/
-typedef uint16_t Error_t;
 
 #endif
 
