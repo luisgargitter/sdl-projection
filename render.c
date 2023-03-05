@@ -42,16 +42,19 @@ void projectCentral(renderCtx_t* r) {
     }
 }
 
-void applyColor(renderCtx_t* r) { // temp function for testing. will be replaced by shading function in future
-    uint8_t colors[4] = {127, 150, 200, 255};
+void applyColor(renderCtx_t* r) {   // temp function for testing. will be replaced by shading function in future
+    static int i = 0;
+    if(i != 0) return;
+    i = 1;
+    uint8_t colors[3] = {0, 127, 255};
     srand(time(NULL));
     for(int32_t i = 0; i < r->obj_c; i++) {
         object_t* o = r->obj_v + i;
         for(int32_t j = 0; j < o->vert_c; j++) {
-            o->proj_v[j].color.r = colors[rand()%4];
-            o->proj_v[j].color.g = colors[rand()%4];
-            o->proj_v[j].color.b = colors[rand()%4];
-            o->proj_v[j].color.a = 255;
+            o->proj_v[j].color.r = colors[rand()%3];
+            o->proj_v[j].color.g = colors[rand()%3];
+            o->proj_v[j].color.b = colors[rand()%3];
+            o->proj_v[j].color.a = 127;
         }
     }
 }
