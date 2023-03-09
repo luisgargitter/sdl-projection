@@ -48,6 +48,8 @@ int main(int argc, char **argv) {
     objectMove(p->obj_v, v);
     projectObjects(p);
 
+
+
     SDL_Event e;
     while(1) {
         SDL_PollEvent(&e);
@@ -58,13 +60,15 @@ int main(int argc, char **argv) {
                 v.y = (float) e.motion.yrel / 10;
                 v.z = 0;
                 objectMove(p->obj_v, v);
-				projectObjects(p);
+		projectObjects(p);
             }
         }
         if(e.type == SDL_MOUSEWHEEL) {
-			v.z = e.wheel.preciseY;
-			objectMove(p->obj_v, v);
-			projectObjects(p);
+	    v.x = 0;
+            v.y = 0;
+            v.z = e.wheel.preciseY;
+	    objectMove(p->obj_v, v);
+	    projectObjects(p);
 		}
 		
     }
