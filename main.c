@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
    
-    // Create new renderer with FOV of 90 degrees (1,5708 rad)
+    // Create new renderer with FOV of 90 degrees (PI / 2)
     renderCtx_t* p = renderCtxNew(win, 1, M_PI / 2);
     if(p == NULL) {
         printf("%s\n", SDL_GetError());
