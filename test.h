@@ -2,7 +2,7 @@
 #define TEST_H
 
 /* only include folloings if app was compliled in unit test mode */
-#ifdef TEST
+#ifdef CTEST
 #include <CUnit/CUnit.h>
 
 

@@ -27,8 +27,10 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    #ifdef DTEST
+    #ifdef CTEST
         printf("Unit Test Mode\n");
+    #else
+        printf("normal mode\n");
     #endif
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
