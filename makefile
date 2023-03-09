@@ -30,7 +30,7 @@ rebuild: clean all
 # Check if SDL2 is installed
 check:
 	echo "SDL Version: $(shell sdl2-config --version)"
-	ehco "Doxygen Version: $(shell doxygen --version)"
+	echo "Doxygen Version: $(shell doxygen --version)"
 
 doc:
 	@doxygen docs/doxy.dox
