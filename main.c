@@ -31,24 +31,25 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
    
-    renderCtx_t* p = malloc(sizeof(renderCtx_t));
     // Create new renderer with FOV of 90 degrees (1,5708 rad)
-    Error_t res = renderCtxNew(win, p, 1, M_PI / 2);
-    if(res) {
+    renderCtx_t* p = renderCtxNew(win, 1, M_PI / 2);
+    if(p == NULL) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
 
-    cubeNew(10, p->obj_v + 0);
+    Error_t res = cubeNew(10, p->obj_v + 0);
+    if(res > 0) return EXIT_FAILURE;
+    
+    // center the cube
     vec_3_t v;
     v.x = -5;
     v.y = -5;
     v.z = 25;
-
     objectMove(p->obj_v, v);
+    
+    // first render
     projectObjects(p);
-
-
 
     SDL_Event e;
     while(1) {

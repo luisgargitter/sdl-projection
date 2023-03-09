@@ -22,7 +22,7 @@ typedef struct {
     object_t* obj_v;	///< Vector containing the objects to be rendered
 } renderCtx_t;
 
-Error_t renderCtxNew(SDL_Window* w, renderCtx_t *p, int32_t obj_c, float_t fov_ratio);
+renderCtx_t* renderCtxNew(SDL_Window* w, int32_t obj_c, float_t fov_ratio);
 
 void renderCtxFree(renderCtx_t* r);
 
