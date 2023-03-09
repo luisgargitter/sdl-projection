@@ -32,24 +32,23 @@ void connectToTriangles(int32_t* index_v) {
     }
 }
 
-object_t* cubeNew(float edgelen) {
-    if(edgelen < 0) return NULL;
-    object_t* o = malloc(sizeof(object_t));
-    if(o == NULL) return NULL;
+Error_t cubeNew(float edgelen, object_t* o) {
+    if(edgelen < 0) return ERR_NULLPTR;
+    if(o == NULL) return ERR_NULLPTR;
     o->vert_c = 8;
     o->vert_v = malloc(sizeof(*(o->vert_v)) * o->vert_c);
-    if(o->vert_v == NULL) return NULL;
+    if(o->vert_v == NULL) return ERR_NULLPTR;
     o->proj_v = malloc(sizeof(*(o->proj_v)) * o->vert_c);
-    if(o->proj_v == NULL) return NULL;
+    if(o->proj_v == NULL) return ERR_NULLPTR;
     o->index_c = 3 * 12;
     o->index_v = malloc(sizeof(*(o->index_v)) * o->index_c);
-    if(o->index_v == NULL) return NULL;
+    if(o->index_v == NULL) return ERR_NULLPTR;
 
     genVerts(edgelen, o->vert_v);
     
     connectToTriangles(o->index_v);
     
-    return o;
+    return ERR_OK;
 }
 
 void cubeFree(object_t* cube) {

@@ -30,15 +30,15 @@ int main(int argc, char **argv) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
-    
-    renderCtx_t *p = renderCtxNew(win);
-    if(p == NULL) {
+   
+    renderCtx_t* p = malloc(sizeof(renderCtx_t));
+    Error_t res = renderCtxNew(win, p, 1);
+    if(res) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
 
-    p->obj_c = 1;
-    p->obj_v = cubeNew(10);
+    cubeNew(10, p->obj_v + 0);
     vec_3_t v;
     v.x = -5;
     v.y = -5;

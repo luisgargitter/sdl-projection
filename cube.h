@@ -4,7 +4,7 @@
 #include "types.h"
 #include <stdint.h>
 
-object_t* cubeNew(float edgelen);
+Error_t cubeNew(float edgelen, object_t* o);
 
 void cubeFree(object_t* cube);
 

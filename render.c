@@ -8,26 +8,25 @@
 
 #include <SDL2/SDL.h>
 
-renderCtx_t * renderCtxNew(SDL_Window *w) {
-    renderCtx_t *p = malloc(sizeof(renderCtx_t));
-    if(p == NULL) abort();
+Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c) {
+    if(p == NULL) return ERR_NULLPTR;
     p->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
     if(p->r == NULL) {
         free(p);
-        return NULL;
+        return ERR_NULLPTR;
     }
     SDL_GetWindowSize(w, &p->width, &p->height);
 
-    p->obj_c = 0;
-    p->obj_v = NULL;
+    p->obj_c = obj_c;
+    p->obj_v = malloc(sizeof(object_t) * p->obj_c);
     
-    return p;
+    return ERR_OK;
 }
 
 void renderCtxFree(renderCtx_t* p) {
     SDL_DestroyRenderer(p->r);
+    if(p->obj_c > 0) free(p->obj_v);
     p->obj_c = 0;
-    free(p->obj_v);
     free(p);
 }
 
@@ -54,7 +53,7 @@ void applyColor(renderCtx_t* r) {   // temp function for testing. will be replac
             o->proj_v[j].color.r = colors[rand()%3];
             o->proj_v[j].color.g = colors[rand()%3];
             o->proj_v[j].color.b = colors[rand()%3];
-            o->proj_v[j].color.a = 127;
+            o->proj_v[j].color.a = 255;
         }
     }
 }
@@ -75,13 +74,4 @@ void projectObjects(renderCtx_t* r) {
     projectCentral(r);
     applyColor(r);
     renderScene(r);
-    /*
-    object_t* o = r->obj_v;
-    for(int i = 0; i < o->vert_c; i++) {
-        //printf("%f %f   ", o->vert_v[i].x, o->vert_v[i].y);
-        printf("%f %f   ", o->proj_v[i].position.x, o->proj_v[i].position.y); 
-        if((i+1) % 2 == 0) printf("\n");
-    }
-    printf("\n");
-    */
 }

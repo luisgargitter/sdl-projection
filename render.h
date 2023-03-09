@@ -17,7 +17,7 @@ typedef struct {
     object_t* obj_v;
 } renderCtx_t;
 
-renderCtx_t * renderCtxNew(SDL_Window* w);
+Error_t renderCtxNew(SDL_Window* w, renderCtx_t *p, int32_t obj_c);
 
 void renderCtxFree(renderCtx_t* r);
 
