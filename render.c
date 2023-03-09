@@ -8,7 +8,7 @@
 
 #include <SDL2/SDL.h>
 
-Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c) {
+Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c, float_t fov) {
     if(p == NULL) return ERR_NULLPTR;
     p->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
     if(p->r == NULL) {
@@ -19,6 +19,8 @@ Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c) {
 
     p->obj_c = obj_c;
     p->obj_v = malloc(sizeof(object_t) * p->obj_c);
+    
+    p->fov_ratio = tanf(fov / 2.0);
     
     return ERR_OK;
 }
@@ -32,11 +34,12 @@ void renderCtxFree(renderCtx_t* p) {
 
 void projectCentral(renderCtx_t* r) {
     object_t* o = NULL;
+    int32_t scaleFactor = (r->width < r->height) ? r->width : r->height; //Get the smaller of the two
     for(int32_t i = 0; i < r->obj_c; i++) {
         o = r->obj_v + i;
         for(int32_t j = 0; j < o->vert_c; j++) {
-            o->proj_v[j].position.x = (o->vert_v[j].x / powf(o->vert_v[j].z, 0.5)) * 50 + ((float) r->width / 2);
-            o->proj_v[j].position.y = (o->vert_v[j].y / powf(o->vert_v[j].z, 0.5)) * 50 + ((float) r->height / 2);
+            o->proj_v[j].position.x = (((o->vert_v[j].x * r->fov_ratio) / o->vert_v[j].z) * scaleFactor) + ((float) r->width / 2);
+            o->proj_v[j].position.y = (((o->vert_v[j].y * r->fov_ratio) / o->vert_v[j].z) * scaleFactor) + ((float) r->height / 2);
         }
     }
 }

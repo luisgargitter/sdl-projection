@@ -25,6 +25,7 @@ clean:
 	-rm -f *.out
 	-rm -f *.o
 	-rm -f $(TARGET)
+	-rm -rf docs/html
 	-rm -f $(TEST_TARGET)
 
 rebuild: clean all
@@ -40,3 +41,7 @@ test: clean --test
 # Check if SDL2 is installed
 check:
 	echo "SDL Version: $(shell sdl2-config --version)"
+	echo "Doxygen Version: $(shell doxygen --version)"
+
+doc:
+	@doxygen docs/doxy.dox
