@@ -1,5 +1,0 @@
-<map id="renderCtx_t" name="renderCtx_t">
-<area shape="rect" id="node1" title="Holds the data for the renderer context." alt="" coords="5,184,96,211"/>
-<area shape="rect" id="node2" href="$structobject__t.html" title="Object in the scene." alt="" coords="17,95,85,121"/>
-<area shape="rect" id="node3" href="$structvec__3__t.html" title="A 3D vector." alt="" coords="17,5,85,32"/>
-</map>
