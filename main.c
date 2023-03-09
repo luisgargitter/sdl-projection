@@ -32,7 +32,8 @@ int main(int argc, char **argv) {
     }
    
     renderCtx_t* p = malloc(sizeof(renderCtx_t));
-    Error_t res = renderCtxNew(win, p, 1);
+    // Create new renderer with FOV of 90 degrees (1,5708 rad)
+    Error_t res = renderCtxNew(win, p, 1, 1.5708);
     if(res) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
@@ -42,7 +43,7 @@ int main(int argc, char **argv) {
     vec_3_t v;
     v.x = -5;
     v.y = -5;
-    v.z = 5;
+    v.z = 25;
 
     objectMove(p->obj_v, v);
     projectObjects(p);
@@ -57,9 +58,15 @@ int main(int argc, char **argv) {
                 v.y = (float) e.motion.yrel / 10;
                 v.z = 0;
                 objectMove(p->obj_v, v);
-                projectObjects(p);
+				projectObjects(p);
             }
         }
+        if(e.type == SDL_MOUSEWHEEL) {
+			v.z = e.wheel.preciseY;
+			objectMove(p->obj_v, v);
+			projectObjects(p);
+		}
+		
     }
 
     // cleanup
