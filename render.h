@@ -8,16 +8,21 @@
 #include <stdint.h>
 
 #include <SDL2/SDL.h>
-
+/**
+ * @brief Holds the data for the renderer context
+ * 
+ * This struct contains the SDL_Renderer, as well as a vector of all objects in the scene
+*/
 typedef struct {
-    SDL_Renderer *r;
-    int32_t width;
-    int32_t height;
-    int32_t obj_c;
-    object_t* obj_v;
+    SDL_Renderer *r;	///< Pointer to the SDL_Renderer
+    int32_t width;		///< Window width
+    int32_t height;		///< Window height
+    float_t fov_ratio;	///< FOV as ratio of the width or height to the depth of the "camera"
+    int32_t obj_c;		///< Number of objects that are to be rendered
+    object_t* obj_v;	///< Vector containing the objects to be rendered
 } renderCtx_t;
 
-Error_t renderCtxNew(SDL_Window* w, renderCtx_t *p, int32_t obj_c);
+Error_t renderCtxNew(SDL_Window* w, renderCtx_t *p, int32_t obj_c, float_t fov_ratio);
 
 void renderCtxFree(renderCtx_t* r);
 

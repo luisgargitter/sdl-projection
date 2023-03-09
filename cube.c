@@ -41,7 +41,7 @@ Error_t cubeNew(float edgelen, object_t* o) {
     o->proj_v = malloc(sizeof(*(o->proj_v)) * o->vert_c);
     if(o->proj_v == NULL) return ERR_NULLPTR;
     o->index_c = 3 * 12;
-    o->index_v = malloc(sizeof(*(o->index_v)) * o->index_c);
+    o->index_v = calloc(o->index_c, sizeof(*(o->index_v))); //Use calloc() to make sure no stray values end up here
     if(o->index_v == NULL) return ERR_NULLPTR;
 
     genVerts(edgelen, o->vert_v);
