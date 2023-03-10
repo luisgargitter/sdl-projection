@@ -8,12 +8,13 @@
 
 #include <SDL2/SDL.h>
 
-Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c, float_t fov) {
-    if(p == NULL) return ERR_NULLPTR;
+renderCtx_t* renderCtxNew(SDL_Window *w, int32_t obj_c, float_t fov) {
+    renderCtx_t* p = malloc(sizeof(renderCtx_t));
+    if(p == NULL) return NULL;
     p->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
     if(p->r == NULL) {
         free(p);
-        return ERR_NULLPTR;
+        return NULL;
     }
     SDL_GetWindowSize(w, &p->width, &p->height);
 
@@ -22,7 +23,7 @@ Error_t renderCtxNew(SDL_Window *w, renderCtx_t *p, int32_t obj_c, float_t fov) 
     
     p->fov_ratio = tanf(fov / 2.0);
     
-    return ERR_OK;
+    return p;
 }
 
 void renderCtxFree(renderCtx_t* p) {
