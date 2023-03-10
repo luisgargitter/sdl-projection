@@ -93,7 +93,9 @@ int main(int argc, char **argv) {
 	}
         if(e.type == SDL_WINDOWEVENT) {
             /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
-	    projectObjects(p);
+	    // update center of projection
+            SDL_GetWindowSize(win, &p->width, &p->height);
+            projectObjects(p);
         }
 		
     }
