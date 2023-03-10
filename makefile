@@ -1,11 +1,10 @@
 
 LIBS = -lm -lSDL2	# Libraries
 CC = gcc			# Compiler
-CFLAGS = -g -Wall	# -g for debugging, -Wall for warnings
+CFLAGS = -g -Wall   # -g for debugging, -Wall for warnings
 TARGET = main		# Name of the executable
 
 TEST_LIBS = -lcunit # Libraries needed for the test
-TEST_DEF = -DCTEST	# defines needed for the test
 TEST_TARGET = test
 
 OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
@@ -30,13 +29,17 @@ clean:
 
 rebuild: clean all
 
-test: clean --test
+test: clean --test-pre  --test
+
+--test-pre: 
+	echo "Pre Build Test..."
+	# adding following test flags to the CFLAGS
+	$(eval CFLAGS += -DCTEST) 
 
 # private target, cannot be called from outside, please call test
 --test: $(OBJECTS)
 	echo "Linking Test..."
-	echo $(TEST_DEF)
-	$(CC) $(TEST_DEF) $(CFLAGS) $(OBJECTS) $(LIBS) $(TEST_LIBS) -o $(TEST_TARGET)
+	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) $(TEST_LIBS) -o $(TEST_TARGET)
 
 # Check if SDL2 is installed
 check:
