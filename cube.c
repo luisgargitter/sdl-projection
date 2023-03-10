@@ -1,5 +1,6 @@
 #include "cube.h"
 #include "types.h"
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -65,3 +66,24 @@ void objectMove(object_t* obj, vec_3_t off) {
     }
 }
 
+
+/* ------==================------ */
+/* ------====== TEST ======------ */
+/* ------==================------ */
+
+#ifdef CTEST
+
+/**
+* @brief Test the cubeNew Interface
+*/
+void test_cubeNew()
+{
+    object_t obj;
+
+    /* test if a call with edglen smaller than zero triggers an error */
+    CU_ASSERT_EQUAL(cubeNew(-1.0f, &obj), ERR_NULLPTR);
+
+    /* test if a null object triggers an error */
+    CU_ASSERT_EQUAL(cubeNew(3.0f, NULL), ERR_NULLPTR);
+}
+#endif

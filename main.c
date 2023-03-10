@@ -7,6 +7,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "test.h"
+
 #include "types.h"
 #include "render.h"
 #include "cube.h"
@@ -18,12 +20,25 @@
 
 #define TITLE "SDL-Projection"
 
+#ifdef CTEST
+int test_main();
+#endif
+
+
 int main(int argc, char **argv) {
     // Initialization
     if(SDL_Init(SDL_INIT_VIDEO ) < 0) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
+
+#ifdef CTEST
+    printf("Unit Test Mode\n");
+    test_main();
+    return 0;
+#else
+    printf("normal mode\n");
+#endif
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if(win == NULL) {
@@ -82,3 +97,50 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
+
+
+
+
+
+/* ------==================------ */
+/* ------====== TEST ======------ */
+/* ------==================------ */
+
+#ifdef CTEST
+
+static int initSuite(void)
+{
+    return CUE_SUCCESS;
+}
+
+static int cleanupSuite(void)
+{
+    return CUE_SUCCESS;
+}
+
+int test_main()
+{
+    /* initialize the CUnit test registry */
+    if (CUE_SUCCESS != CU_initialize_registry())
+        return CU_get_error();
+    
+    CU_pSuite pSuite = CU_add_suite("SDL-Projection", initSuite, cleanupSuite);
+    
+    /* check if the suite was created successfully */
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+    }
+
+    /* add here all tests */
+    if ( (NULL == CU_add_test(pSuite, "Cube: \t cubeNew interface \t", test_cubeNew)) )
+    {
+       CU_cleanup_registry();
+    }
+
+    CU_basic_set_mode(CU_BRM_VERBOSE);
+    CU_basic_run_tests();
+
+    return CU_get_error();
+}
+
+#endif
