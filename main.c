@@ -93,6 +93,14 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
 }
 
+
+
+
+
+/* ------==================------ */
+/* ------====== TEST ======------ */
+/* ------==================------ */
+
 #ifdef CTEST
 
 static int initSuite(void)
@@ -103,13 +111,6 @@ static int initSuite(void)
 static int cleanupSuite(void)
 {
     return CUE_SUCCESS;
-}
-
-void testmethod_1()
-{
-
-    CU_ASSERT_FATAL(2<1);
-    printf("testmoethod_1 called\n");
 }
 
 int test_main()
@@ -126,7 +127,7 @@ int test_main()
     }
 
     /* add here all tests */
-    if ( (NULL == CU_add_test(pSuite, "just a small test", testmethod_1)) )
+    if ( (NULL == CU_add_test(pSuite, "Cube: \t cubeNew interface \t", test_cubeNew)) )
     {
        CU_cleanup_registry();
     }

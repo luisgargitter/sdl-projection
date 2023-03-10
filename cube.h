@@ -10,4 +10,8 @@ void cubeFree(object_t* cube);
 
 void objectMove(object_t* obj, vec_3_t off);
 
+#ifdef CTEST
+void test_cubeNew();
+#endif
+
 #endif
