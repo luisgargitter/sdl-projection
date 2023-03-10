@@ -1,4 +1,5 @@
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_video.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -40,7 +41,11 @@ int main(int argc, char **argv) {
     printf("normal mode\n");
 #endif
 
-    SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED,
+                                       SDL_WINDOWPOS_UNDEFINED,
+                                       WIDTH,
+                                       HEIGHT,
+                                       SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if(win == NULL) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
@@ -85,7 +90,11 @@ int main(int argc, char **argv) {
             v.z = e.wheel.preciseY;
 	    objectMove(p->obj_v, v);
 	    projectObjects(p);
-		}
+	}
+        if(e.type == SDL_WINDOWEVENT) {
+            /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
+	    projectObjects(p);
+        }
 		
     }
 
