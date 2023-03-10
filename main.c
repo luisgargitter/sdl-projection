@@ -20,6 +20,11 @@
 
 #define TITLE "SDL-Projection"
 
+#ifdef CTEST
+int test_main();
+#endif
+
+
 int main(int argc, char **argv) {
     // Initialization
     if(SDL_Init(SDL_INIT_VIDEO ) < 0) {
@@ -27,18 +32,20 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    #ifdef CTEST
-        printf("Unit Test Mode\n");
-    #else
-        printf("normal mode\n");
-    #endif
+#ifdef CTEST
+    printf("Unit Test Mode\n");
+    test_main();
+    return 0;
+#else
+    printf("normal mode\n");
+#endif
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if(win == NULL) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
-   
+
     renderCtx_t* p = malloc(sizeof(renderCtx_t));
     // Create new renderer with FOV of 90 degrees (1,5708 rad)
     Error_t res = renderCtxNew(win, p, 1, 1.5708);
@@ -66,15 +73,15 @@ int main(int argc, char **argv) {
                 v.y = (float) e.motion.yrel / 10;
                 v.z = 0;
                 objectMove(p->obj_v, v);
-				projectObjects(p);
+                projectObjects(p);
             }
         }
         if(e.type == SDL_MOUSEWHEEL) {
-			v.z = e.wheel.preciseY;
-			objectMove(p->obj_v, v);
-			projectObjects(p);
-		}
-		
+            v.z = e.wheel.preciseY;
+            objectMove(p->obj_v, v);
+            projectObjects(p);
+        }
+
     }
 
     // cleanup
@@ -85,3 +92,49 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
+
+#ifdef CTEST
+
+static int initSuite(void)
+{
+    return CUE_SUCCESS;
+}
+
+static int cleanupSuite(void)
+{
+    return CUE_SUCCESS;
+}
+
+void testmethod_1()
+{
+
+    CU_ASSERT_FATAL(2<1);
+    printf("testmoethod_1 called\n");
+}
+
+int test_main()
+{
+    /* initialize the CUnit test registry */
+    if (CUE_SUCCESS != CU_initialize_registry())
+        return CU_get_error();
+    
+    CU_pSuite pSuite = CU_add_suite("SDL-Projection", initSuite, cleanupSuite);
+    
+    /* check if the suite was created successfully */
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+    }
+
+    /* add here all tests */
+    if ( (NULL == CU_add_test(pSuite, "just a small test", testmethod_1)) )
+    {
+       CU_cleanup_registry();
+    }
+
+    CU_basic_set_mode(CU_BRM_VERBOSE);
+    CU_basic_run_tests();
+
+    return CU_get_error();
+}
+
+#endif

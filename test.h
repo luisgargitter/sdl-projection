@@ -4,7 +4,7 @@
 /* only include folloings if app was compliled in unit test mode */
 #ifdef CTEST
 #include <CUnit/CUnit.h>
-
+#include <CUnit/Basic.h>
 
 #endif
 #endif
