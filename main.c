@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
     SDL_Event e;
     while(1) {
-        SDL_PollEvent(&e);
+        SDL_WaitEventTimeout(&e, 10); //wait 10ms at most for the next event
         if(e.type == SDL_QUIT) break;
         if(e.type == SDL_MOUSEMOTION) {
             if(e.motion.state == SDL_BUTTON_LMASK) {
@@ -81,19 +81,19 @@ int main(int argc, char **argv) {
                 v.y = (float) e.motion.yrel / 10;
                 v.z = 0;
                 objectMove(p->obj_v, v);
-		projectObjects(p);
+				projectObjects(p);
             }
         }
         if(e.type == SDL_MOUSEWHEEL) {
-	    v.x = 0;
+			v.x = 0;
             v.y = 0;
             v.z = e.wheel.preciseY;
-	    objectMove(p->obj_v, v);
-	    projectObjects(p);
-	}
+			objectMove(p->obj_v, v);
+			projectObjects(p);
+		}
         if(e.type == SDL_WINDOWEVENT) {
             /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
-	    // update center of projection
+			// update center of projection
             SDL_GetWindowSize(win, &p->width, &p->height);
             projectObjects(p);
         }
