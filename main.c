@@ -37,8 +37,6 @@ int main(int argc, char **argv) {
     printf("Unit Test Mode\n");
     test_main();
     return 0;
-#else
-    printf("normal mode\n");
 #endif
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED,
