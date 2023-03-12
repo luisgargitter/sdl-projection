@@ -66,10 +66,8 @@ int main(int argc, char **argv) {
 
 
     // center the cube
-    vec_3_t v;
-    v.x = -5;
-    v.y = -5;
-    v.z = 25;
+    vec_3_t v = { .x = -5, .y = -5, .z = 25};
+    
     objectMove(p->obj_v, v);
     
     // first render
