@@ -1,5 +1,6 @@
 #include "render.h"
 #include "types.h"
+#include "object.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,6 +63,32 @@ void applyColor(renderCtx_t* r) {   // temp function for testing. will be replac
     }
 }
 
+void determineVisible(renderCtx_t* r) {
+	object_t* t = NULL;
+	surface_t currentSurf;
+	stack_item stItem;
+    for(int32_t i = 0; i < r->obj_c; i++) {
+        t = r->obj_v + i;
+		for(int32_t f = 0; f < t->surface_c; f++){
+			currentSurf = t->surface_v[f];
+			
+			//Compute the Z component of the cross product of v1->v3 and v1->v2
+			
+			float zComp = ((t->proj_v[currentSurf.v3].position.x - t->proj_v[currentSurf.v1].position.x) //v1->v3's X coord
+						* (t->proj_v[currentSurf.v2].position.y - t->proj_v[currentSurf.v1].position.y)) //v1->v2's Y coord
+						- ((t->proj_v[currentSurf.v3].position.y - t->proj_v[currentSurf.v1].position.y) //v1->v3's Y coord
+						* (t->proj_v[currentSurf.v2].position.x - t->proj_v[currentSurf.v1].position.x)); //v1->v2's X coord
+			
+			
+			if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
+			{
+				stItem.surf = currentSurf;
+				st_push(&(t->index_st), stItem);
+			}
+		}
+    }
+}
+
 void renderScene(renderCtx_t* r) {
     SDL_SetRenderDrawColor(r->r, 0, 0, 0, 255);
     SDL_RenderClear(r->r);
@@ -69,13 +96,14 @@ void renderScene(renderCtx_t* r) {
     object_t* t = NULL;
     for(int32_t i = 0; i < r->obj_c; i++) {
         t = r->obj_v + i;
-        SDL_RenderGeometry(r->r, NULL, t->proj_v, t->vert_c, t->index_v, t->index_c);
+        SDL_RenderGeometry(r->r, NULL, t->proj_v, t->vert_c, (const int*)t->index_st.items, t->index_st.num_items*3);
     }
     SDL_RenderPresent(r->r);
 }
 
 void projectObjects(renderCtx_t* r) {
     projectCentral(r);
+    determineVisible(r);
     applyColor(r);
     renderScene(r);
 }

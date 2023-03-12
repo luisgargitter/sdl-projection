@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "types.h"
+#include "object.h"
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -14,6 +14,7 @@
 #include "types.h"
 #include "render.h"
 #include "cube.h"
+#include "object.h"
 
 #define WIDTH 800
 #define HEIGHT 600

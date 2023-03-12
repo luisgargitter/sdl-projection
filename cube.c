@@ -20,16 +20,20 @@ void genVerts(float edgelen, vec_3_t vert_v[8]) {
     }
 }
 
-void connectToTriangles(int32_t* index_v) {
-    int32_t edgeLUT[3 * 12] = {
-        0, 1, 2,    0, 2, 4,    0, 4, 1,
-        3, 1, 2,    3, 2, 7,    3, 7, 1,
-        5, 1, 4,    5, 4, 7,    5, 7, 1,
-        6, 2, 4,    6, 4, 7,    6, 7, 2
+void connectToTriangles(object_t* obj) {
+    int32_t surfaceLUT[12][3] = {
+        {0, 2, 1},    {1, 2, 3},
+        {0, 4, 2},    {6, 2, 4},
+        {4, 0, 1},	  {4, 1, 5},
+        {3, 2, 7},    {6, 7, 2},
+        {3, 7, 1},    {5, 1, 7},
+        {5, 7, 4},    {6, 4, 7}
     };
 
-    for(int32_t i = 0; i < 3 * 12; i++) {
-        index_v[i] = edgeLUT[i];
+    for(int32_t i = 0; i < obj->surface_c; i++) {
+        obj->surface_v[i].v1 = surfaceLUT[i][0];
+        obj->surface_v[i].v2 = surfaceLUT[i][1];
+        obj->surface_v[i].v3 = surfaceLUT[i][2];
     }
 }
 
@@ -41,19 +45,22 @@ Error_t cubeNew(float edgelen, object_t* o) {
     if(o->vert_v == NULL) return ERR_NULLPTR;
     o->proj_v = malloc(sizeof(*(o->proj_v)) * o->vert_c);
     if(o->proj_v == NULL) return ERR_NULLPTR;
-    o->index_c = 3 * 12;
-    o->index_v = calloc(o->index_c, sizeof(*(o->index_v))); //Use calloc() to make sure no stray values end up here
-    if(o->index_v == NULL) return ERR_NULLPTR;
+    
+    o->surface_c = 12;
+    o->surface_v = malloc(sizeof(*(o->surface_v)) * o->surface_c);
+    if(o->surface_v == NULL) return ERR_NULLPTR;
+    
+    o->index_st = st_create(6); //A cube has no more than 6 triangles visible at a time
 
     genVerts(edgelen, o->vert_v);
     
-    connectToTriangles(o->index_v);
+    connectToTriangles(o);
     
     return ERR_OK;
 }
 
 void cubeFree(object_t* cube) {
-    free(cube->index_v);
+    free(cube->surface_v);
     free(cube->vert_v);
     free(cube);
 }
