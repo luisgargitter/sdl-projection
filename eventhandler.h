@@ -15,4 +15,5 @@ typedef struct
 } eventhandler_t;
 
 eventhandler_t* newEventhandler(SDL_Window* pWin, renderCtx_t* pRender);
+void freeEventhandler(eventhandler_t* self);
 Error_t pollEvents(eventhandler_t* self);

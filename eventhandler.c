@@ -15,6 +15,11 @@ eventhandler_t* newEventhandler(SDL_Window* pWin, renderCtx_t* pRender)
     return obj;
 }
 
+void freeEventhandler(eventhandler_t* self)
+{
+    free(self);
+}
+
 Error_t pollEvents(eventhandler_t* self)
 {
     Error_t retCode = ERR_OK;

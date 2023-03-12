@@ -45,14 +45,17 @@ int main(int argc, char **argv) {
                                        WIDTH,
                                        HEIGHT,
                                        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    if(win == NULL) {
-        printf("%s\n", SDL_GetError());
-        return EXIT_FAILURE;
-    }
    
     // Create new renderer with FOV of 90 degrees (1,5708 rad)
     renderCtx_t* p = renderCtxNew(win, 1, M_PI / 2);
-    if(p == NULL) {
+
+    eventhandler_t* eventHandler = newEventhandler(win, p);
+
+    /* check if all objects were allocated correctly */
+    if( (NULL == p) ||
+        (NULL == win) || 
+        (NULL == eventHandler))
+    {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
@@ -61,7 +64,6 @@ int main(int argc, char **argv) {
     if(res > 0) return EXIT_FAILURE;
    
 
-    eventhandler_t* eventHandler = newEventhandler(win, p);
 
     // center the cube
     vec_3_t v;
@@ -79,7 +81,7 @@ int main(int argc, char **argv) {
 
     // cleanup
     renderCtxFree(p);
-
+    freeEventhandler(eventHandler);
     SDL_DestroyWindow(win);
     SDL_Quit();
 
