@@ -8,6 +8,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "eventhandler.h"
 #include "test.h"
 
 #include "types.h"
@@ -58,7 +59,10 @@ int main(int argc, char **argv) {
 
     Error_t res = cubeNew(10, p->obj_v + 0);
     if(res > 0) return EXIT_FAILURE;
-    
+   
+
+    eventhandler_t* eventHandler = newEventhandler(win, p);
+
     // center the cube
     vec_3_t v;
     v.x = -5;
@@ -69,33 +73,8 @@ int main(int argc, char **argv) {
     // first render
     projectObjects(p);
 
-    SDL_Event e;
-    while(1) {
-        SDL_WaitEventTimeout(&e, 10); //wait 10ms at most for the next event
-        if(e.type == SDL_QUIT) break;
-        if(e.type == SDL_MOUSEMOTION) {
-            if(e.motion.state == SDL_BUTTON_LMASK) {
-                v.x = (float) e.motion.xrel / 10;
-                v.y = (float) e.motion.yrel / 10;
-                v.z = 0;
-                objectMove(p->obj_v, v);
-				projectObjects(p);
-            }
-        }
-        if(e.type == SDL_MOUSEWHEEL) {
-			v.x = 0;
-            v.y = 0;
-            v.z = e.wheel.preciseY;
-			objectMove(p->obj_v, v);
-			projectObjects(p);
-		}
-        if(e.type == SDL_WINDOWEVENT) {
-            /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
-			// update center of projection
-            SDL_GetWindowSize(win, &p->width, &p->height);
-            projectObjects(p);
-        }
-		
+    while(0 == eventHandler->quitApp) {
+        pollEvents(eventHandler);
     }
 
     // cleanup
