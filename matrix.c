@@ -9,7 +9,7 @@
 #include "Error.h"
 
 
-inline uint32_t matrixIndex(matrix_t *mat, uint32_t m, uint32_t n) {
+uint32_t matrixIndex(matrix_t *mat, uint32_t m, uint32_t n) {
     return m * mat->n + n;
 }
 

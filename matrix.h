@@ -11,7 +11,7 @@ typedef struct {
     float *mat;
 } matrix_t;
 
-inline uint32_t matrixIndex(matrix_t *mat, uint32_t m, uint32_t n);
+// inline uint32_t matrixIndex(matrix_t *mat, uint32_t m, uint32_t n);
     // Returns the proper indexvalue as of m and n, 
     // because the matrix is internally a one-dimensional array.
     // This inline function does not check its inputs -> use with caution. 
