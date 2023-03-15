@@ -1,12 +1,11 @@
+#ifndef OBJECT_H
+#define OBJECT_H
+
 #include "stack.h"
 #include <stdint.h>
 #include <SDL2/SDL.h>
-#ifndef TYPES_H
-	#include "types.h"
-#endif
+#include "types.h"
 
-#ifndef OBJECT_T
-#define OBJECT_T
 /**
  * @brief Object in the scene
  * 
