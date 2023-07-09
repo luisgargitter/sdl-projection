@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     o->asset = &a;
     o->visible_faces = malloc(sizeof(*o->visible_faces) * o->asset->f_count * 3);
     o->scene_offset.x = 0;
-    o->scene_offset.y = -2.5;
+    o->scene_offset.y = -1;
     o->scene_offset.z = 10;
     o->scene_orientation.column_vectors = NULL;
     o->proj_v = malloc(sizeof(*o->proj_v) * o->asset->v_count);

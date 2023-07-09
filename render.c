@@ -56,7 +56,7 @@ void projectCentral(renderCtx_t* r) {
 
         for(int32_t j = 0; j < o->asset->v_count; j++) {
             o->proj_v[j].position.x = ((v[j].x + offset.x) / (v[j].z + offset.z)) * scaled_fov + centerx;
-            o->proj_v[j].position.y = ((v[j].y + offset.y) / (v[j].z + offset.z)) * scaled_fov + centery;
+            o->proj_v[j].position.y = r->height - (((v[j].y + offset.y) / (v[j].z + offset.z)) * scaled_fov + centery);
         }
     }
 }
@@ -114,10 +114,10 @@ int renderScene(renderCtx_t* r) {
         //printf("%d %d\n", t->asset->v_count, t->vf_count);
 
         int vf_offset = 0;
-        do { // does not guarantee to draw entire mesh!!!
+        do {
             int ret = SDL_RenderGeometry(r->r, NULL, 
             t->proj_v, (int) t->asset->v_count, 
-            t->visible_faces + vf_offset, (vf_offset < t->vf_count) ? SDL_RENDER_LIMIT : (t->vf_count % SDL_RENDER_LIMIT));
+            t->visible_faces + vf_offset * 3, ((vf_offset < t->vf_count) ? SDL_RENDER_LIMIT : (t->vf_count % SDL_RENDER_LIMIT)) * 3);
 
             vf_offset += SDL_RENDER_LIMIT;
             if(ret == -1) return -1; // SDL Error
