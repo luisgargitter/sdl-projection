@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DEFAULT_VERT_COUNT 10000
-#define DEFAULT_FACE_COUNT 10000
+#define DEFAULT_VERT_COUNT 512
+#define DEFAULT_FACE_COUNT 512
 
 int resize_asset(asset_t* a, int32_t vertex_count, int32_t face_count) {
     a->v_vector = realloc(a->v_vector, sizeof(*(a->v_vector)) * vertex_count);
@@ -76,8 +76,6 @@ int asset_load_obj(FILE* f, asset_t* a) {
         line = NULL;
     }
 
-    //printf("%d, %d\n", vc, fc);
-
     // filtering optional data.
     if(contains_vertex_normals == false) {
         free(a->vn_vector);
@@ -89,4 +87,14 @@ int asset_load_obj(FILE* f, asset_t* a) {
     }
 
     return 0;
+}
+
+
+void asset_free(asset_t* a) {
+    a->v_count = 0;
+    free(a->f_vector);
+    free(a->vn_vector);
+    free(a->vt_vector);
+    a->f_count = 0;
+    free(a->f_vector);
 }

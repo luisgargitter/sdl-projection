@@ -6,7 +6,7 @@
 #define POLL_EVENT_TIMEOUT_MS   16 // 16 ms for 60 fps
 
 
-eventhandler_t* newEventhandler(SDL_Window* pWin, renderCtx_t* pRender)
+eventhandler_t* newEventhandler(SDL_Window* pWin, render_t* pRender)
 {
     eventhandler_t* obj = malloc(sizeof(eventhandler_t));
     obj->pWin = pWin;

@@ -6,7 +6,6 @@
 
 #include "Error.h"  // the errors should be available everywhere
 
-
 // shorter name tyes
 typedef uint8_t   u8;
 typedef uint16_t  u16;
@@ -25,7 +24,7 @@ typedef struct {
 } vec_3_t;
 
 typedef struct {
-    vec_3_t* column_vectors;
+    vec_3_t column_vectors[3];
 } matrix_3x3_t;
 
 #endif

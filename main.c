@@ -1,23 +1,19 @@
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
 
 #include <math.h>
-
 #include <SDL2/SDL.h>
-
-#include "eventhandler.h"
-#include "test.h"
 
 #include "types.h"
 #include "render.h"
 #include "cube.h"
 #include "asset.h"
 #include "object.h"
+#include "eventhandler.h"
+#include "test.h"
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -49,78 +45,58 @@ int main(int argc, char **argv) {
                                        WIDTH,
                                        HEIGHT,
                                        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-    // Create new renderer with FOV of 90 degrees (1,5708 rad)
-    renderCtx_t* p = renderCtxNew(win, 1, M_PI / 2);
-    //eventhandler_t* eventHandler = newEventhandler(win, p);
-
-    /* check if all objects were allocated correctly */
-    if( (NULL == p) ||
-        (NULL == win) /*||
-        (NULL == eventHandler)*/)
-    {
-        printf("%s\n", SDL_GetError());
+    if(win == NULL) {
+        printf("%s", SDL_GetError());
         return EXIT_FAILURE;
     }
 
-    asset_t a;
-    FILE* f = fopen("test_assets/teapot.obj", "rb");
+    render_t* r = malloc(sizeof(*r));
+    if(r == NULL) return EXIT_FAILURE;
+    
+    // Create new renderer with FOV of 90 degrees (1,5708 rad)
+    if(render_init(r, win, M_PI / 2) < 0) return EXIT_FAILURE;
 
-    asset_load_obj(f, &a);
+    //eventhandler_t* eventHandler = newEventhandler(win, p);
+
+    FILE* f = fopen("test_assets/teapot.obj", "rb");
+    if(f == NULL) {
+        printf("IO-Error: File %s, Line %d, Code %d", __FILE__, __LINE__, errno);
+        return EXIT_FAILURE;
+    }
+
+    asset_t* a = malloc(sizeof(*a));
+    if(a == NULL) return EXIT_FAILURE;
+
+    asset_load_obj(f, a);
     fclose(f);
 
-    object_t* o = (p->obj_v + 0);
-    o->asset = &a;
-    o->visible_faces = malloc(sizeof(*o->visible_faces) * o->asset->f_count * 3);
-    o->scene_offset.x = 0;
-    o->scene_offset.y = -1;
-    o->scene_offset.z = 10;
-    o->scene_orientation.column_vectors = NULL;
-    o->proj_v = malloc(sizeof(*o->proj_v) * o->asset->v_count);
+    vec_3_t c1 = {.x = 0.71, .y = 0, .z = -0.71};
+    vec_3_t c2 = {.x = 0, .y = 1, .z = 0};
+    vec_3_t c3 = {.x = 0.71, .y = 0, .z = 0.71};
+    matrix_3x3_t m = {c1, c2, c3};
 
-    /*
-    Error_t res = cubeNew(10, p->obj_v + 0);
-    if(res > 0) return EXIT_FAILURE;
-
-    // center the cube
-    vec_3_t v = { .x = -5, .y = -5, .z = 25};
-
-
-    objectMove(p->obj_v, v);
-    */
-    //first render
-    //projectObjects(p);
+    vec_3_t v = {3, -3, 10};
+    
+    render_add_object(r, a, m, v);
 
     /*
     while(0 == eventHandler->quitApp) {
         pollEvents(eventHandler);
     }
      */
-
-    /*
-    int max = 0;
-    int min = INT32_MAX;
-    for(int i = 0; i < p->obj_v->asset->f_count * 3; i++) {
-        int t = p->obj_v->asset->f_vector[i];
-
-        if(max < t) max = t;
-        if(min > t) min = t;
-    }
-    printf("max index: %d, min index: %d, num vertices: %d\n", max, min, p->obj_v->asset->v_count);
-    */
-
-    if(projectObjects(p) == -1) {
+    if(projectObjects(r)) {
         printf("%s\n", SDL_GetError());
         return EXIT_FAILURE;
-    }
+    }    
+
     printf("Press Enter to quit: ");
-    fflush(stdin);
+    fflush(stdout);
         
     getchar();
 
     // cleanup
     //freeEventhandler(eventHandler);
-    renderCtxFree(p);
+    render_free(r);
     SDL_DestroyWindow(win);
     SDL_Quit();
 

@@ -13,58 +13,72 @@
 
 #include <SDL2/SDL.h>
 
-renderCtx_t* renderCtxNew(SDL_Window *w, int32_t obj_c, float_t fov) {
-    if(obj_c <= 0) return NULL;
+#define DEFAULT_CAPACITY_OBJECTS 32
 
-    renderCtx_t* p = malloc(sizeof(renderCtx_t));
-    if(p == NULL) return NULL;
-    p->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
-    if(p->r == NULL) {
-        free(p);
-        return NULL;
-    }
-    SDL_GetWindowSize(w, &p->width, &p->height);
+int render_init(render_t* r, SDL_Window *w, float_t fov) {
+    r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
+    if(r->r == NULL) return -1;
 
-    p->obj_c = obj_c;
-    p->obj_v = malloc(sizeof(object_t) * p->obj_c);
+    SDL_GetWindowSize(w, &r->width, &r->height);
+
+    r->num_objects = 0;
+    r->capacity_objects = DEFAULT_CAPACITY_OBJECTS;
+    r->objects = malloc(sizeof(object_t) * r->capacity_objects);
     
-    p->fov_ratio = tanf(fov / 2.0);
+    r->fov_ratio = tanf(fov / 2.0);
     
-    return p;
+    return 0;
 }
 
-void renderCtxFree(renderCtx_t* p) {
+void render_free(render_t* p) {
     SDL_DestroyRenderer(p->r);
-    free(p->obj_v);
-    p->obj_v = NULL;
-    p->obj_c = 0;
-    free(p);
+
+    for(int32_t i = 0; i < p->num_objects; i++) {
+        object_free(p->objects + i);
+    }
+
+    p->capacity_objects = 0;
+    p->num_objects = 0;
+    free(p->objects);
 }
 
-void projectCentral(renderCtx_t* r) {
+int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec_3_t offset) {
+    if(r->num_objects >= r->capacity_objects) {
+        r->capacity_objects *= 2;
+        r->objects = realloc(r->objects, r->capacity_objects);
+    }
+
+    object_init(r->objects + r->num_objects, asset, orientation, offset);
+    r->num_objects++;
+
+    return 0;
+}
+
+void projectCentral(render_t* r) {
     float scaleFactor = fminf(r->width, r->height); // TODO: should only be calculated on WindowEvent<Resize>
     float centerx = (float) r->width / 2;
     float centery = (float) r->height / 2;
     float scaled_fov = scaleFactor * r->fov_ratio;
 
-    for(int32_t i = 0; i < r->obj_c; i++) {
-        object_t* o = r->obj_v + i;
-        vec_3_t* v = o->asset->v_vector;
-        vec_3_t offset = o->scene_offset;
+    for(int32_t i = 0; i < r->num_objects; i++) {
+        object_t* o = r->objects + i;
+        vec_3_t* v = o->vertices_in_scene;
 
         for(int32_t j = 0; j < o->asset->v_count; j++) {
-            o->proj_v[j].position.x = ((v[j].x + offset.x) / (v[j].z + offset.z)) * scaled_fov + centerx;
-            o->proj_v[j].position.y = r->height - (((v[j].y + offset.y) / (v[j].z + offset.z)) * scaled_fov + centery);
+            o->proj_v[j].position.x = (v[j].x / v[j].z) * scaled_fov + centerx;
+            o->proj_v[j].position.y = r->height - ((v[j].y / v[j].z) * scaled_fov + centery);
+
+            //printf("%f %f\n", o->proj_v[j].position.x, o->proj_v[j].position.y);
         }
     }
 }
 
-void applyColor(renderCtx_t* r) { // temp function for testing. will be replaced by shading function in future
+void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
     uint8_t colors[3] = {0, 127, 255};
     srand((unsigned int) time(NULL));
 
-    for(int32_t j = 0; j < r->obj_c; j++) {
-        object_t* o = r->obj_v + j;
+    for(int32_t j = 0; j < r->num_objects; j++) {
+        object_t* o = r->objects + j;
         for(int32_t k = 0; k < o->asset->v_count; k++) {
             o->proj_v[k].color.r = colors[rand()%3];
             o->proj_v[k].color.g = colors[rand()%3];
@@ -74,9 +88,9 @@ void applyColor(renderCtx_t* r) { // temp function for testing. will be replaced
     }
 }
 
-void determineVisible(renderCtx_t* r) {
-    for(int32_t i = 0; i < r->obj_c; i++) {
-        object_t* t = r->obj_v + i;
+void determineVisible(render_t* r) {
+    for(int32_t i = 0; i < r->num_objects; i++) {
+        object_t* t = r->objects + i;
         t->vf_count = 0;
 
         for(int32_t f = 0; f < t->asset->f_count; f++){
@@ -102,14 +116,15 @@ void determineVisible(renderCtx_t* r) {
     }
 }
 
-int renderScene(renderCtx_t* r) {
+int renderScene(render_t* r) {
     SDL_SetRenderDrawColor(r->r, 0, 0, 0, 255);
     SDL_RenderClear(r->r);
     //SDL_SetRenderDrawColor(r->r, 255, 255, 255, 255);
     
-    for(int32_t i = 0; i < r->obj_c; i++) {
-        object_t* t = r->obj_v + i;
+    for(int32_t i = 0; i < r->num_objects; i++) { 
+        object_t* t = r->objects + i;
 
+        printf("Drawing %d/%d faces over %d vertices\n", t->vf_count, t->asset->f_count, t->asset->v_count);
         int ret = SDL_RenderGeometry(r->r, NULL, 
             t->proj_v, t->asset->v_count, t->visible_faces, t->vf_count * 3);
         if(ret < 0) return ret;
@@ -119,11 +134,11 @@ int renderScene(renderCtx_t* r) {
     return 0;
 }
 
-int projectObjects(renderCtx_t* r) {
+int projectObjects(render_t* r) {
     projectCentral(r);
     determineVisible(r);
     applyColor(r);
-    if(renderScene(r) == -1) return -1;
-
-    return 0;
+    int r1 = renderScene(r);
+    
+    return r1;
 }
