@@ -13,8 +13,6 @@
 
 #include <SDL2/SDL.h>
 
-#define SDL_RENDER_LIMIT 1023
-
 renderCtx_t* renderCtxNew(SDL_Window *w, int32_t obj_c, float_t fov) {
     if(obj_c <= 0) return NULL;
 
@@ -111,19 +109,10 @@ int renderScene(renderCtx_t* r) {
     
     for(int32_t i = 0; i < r->obj_c; i++) {
         object_t* t = r->obj_v + i;
-        //printf("%d %d\n", t->asset->v_count, t->vf_count);
 
-        int vf_offset = 0;
-        do {
-            int ret = SDL_RenderGeometry(r->r, NULL, 
-            t->proj_v, (int) t->asset->v_count, 
-            t->visible_faces + vf_offset * 3, ((vf_offset < t->vf_count) ? SDL_RENDER_LIMIT : (t->vf_count % SDL_RENDER_LIMIT)) * 3);
-
-            vf_offset += SDL_RENDER_LIMIT;
-            if(ret == -1) return -1; // SDL Error
-        } while(vf_offset < t->vf_count + SDL_RENDER_LIMIT); 
-
-        printf("Frame was drawn in %d cycles.\n", vf_offset / SDL_RENDER_LIMIT);
+        int ret = SDL_RenderGeometry(r->r, NULL, 
+            t->proj_v, t->asset->v_count, t->visible_faces, t->vf_count * 3);
+        if(ret < 0) return ret;
     }
     SDL_RenderPresent(r->r);
 
