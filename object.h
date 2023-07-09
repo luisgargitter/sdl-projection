@@ -1,25 +1,20 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+//
+// Created by luis on 06.07.23.
+//
 
-#include "stack.h"
-#include <stdint.h>
-#include <SDL2/SDL.h>
+#ifndef SDL_PROJECTION_OBJECT_H
+#define SDL_PROJECTION_OBJECT_H
+
 #include "types.h"
+#include "asset.h"
 
-/**
- * @brief Object in the scene
- * 
- * Contains the vertices, as well as the projected vertices of an object
- */ 
 typedef struct {
-  int32_t vert_c;		///< Number of vertices
-  vec_3_t* vert_v;		///< Vector, containing the vertices
-  SDL_Vertex* proj_v;	///< Vector, containing the transformed through projection vertices
-  
-  surface_t* surface_v;	///< Vector, containing the surfaces of the mesh
-  int32_t surface_c;		///< Number of surfaces in the mesh 
-
-  //int32_t index_c;	///< Size of `index_v`
-  stack index_st;	///< Stack, containing the indices of the vertices that need to be rendered (for implementing Z-Buffer)
+    asset_t* asset;
+    matrix_3x3_t scene_orientation;
+    vec_3_t scene_offset;
+    SDL_Vertex* proj_v;
+    int32_t* visible_faces; // stored as int triplets
+    int32_t vf_count;
 } object_t;
-#endif
+
+#endif //SDL_PROJECTION_OBJECT_H

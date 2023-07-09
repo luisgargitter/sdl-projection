@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "object.h"
+#include "asset.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,6 +28,6 @@ renderCtx_t* renderCtxNew(SDL_Window* w, int32_t obj_c, float_t fov_ratio);
 
 void renderCtxFree(renderCtx_t* r);
 
-void projectObjects(renderCtx_t* r);
+int projectObjects(renderCtx_t* r);
 
 #endif

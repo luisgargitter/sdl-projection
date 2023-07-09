@@ -1,6 +1,6 @@
 
 LIBS = -lm -lSDL2	# Libraries
-CC = gcc			# Compiler
+CC = clang			# Compiler
 CFLAGS = -g -Wall   # -g for debugging, -Wall for warnings
 TARGET = main		# Name of the executable
 

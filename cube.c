@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/*
 void genVerts(float edgelen, vec_3_t vert_v[8]) {
     int32_t ind = 0;
     for(int32_t i = 0; i < 2; i++) {
@@ -73,6 +74,7 @@ void objectMove(object_t* obj, vec_3_t off) {
     }
 }
 
+ */
 
 /* ------==================------ */
 /* ------====== TEST ======------ */

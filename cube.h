@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include <stdint.h>
+#include "asset.h"
 #include "object.h"
 
 Error_t cubeNew(float edgelen, object_t* o);

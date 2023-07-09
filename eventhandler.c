@@ -62,7 +62,7 @@ Error_t pollEvents(eventhandler_t* self)
     }
     } while(SDL_PollEvent(&e) > 0);
 
-    objectMove(self->pRenderer->obj_v, v);
+    //objectMove(self->pRenderer->obj_v, v);
     projectObjects(self->pRenderer);
 
     return retCode;
