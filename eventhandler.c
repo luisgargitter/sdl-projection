@@ -1,57 +1,58 @@
 #include "eventhandler.h"
-#include <SDL2/SDL_events.h>
+
 #include <stdlib.h>
-#include "cube.h"
+#include <SDL2/SDL_events.h>
+
+#include "types.h"
+#include "render.h"
 
 #define POLL_EVENT_TIMEOUT_MS   16 // 16 ms for 60 fps
 
 
-eventhandler_t* newEventhandler(SDL_Window* pWin, render_t* pRender)
-{
-    eventhandler_t* obj = malloc(sizeof(eventhandler_t));
-    obj->pWin = pWin;
-    obj->pRenderer = pRender;
-    obj->quitApp = 0;
-    return obj;
+int32_t event_handler_init(event_handler_t* e, SDL_Window* w, render_t* r) {
+    e->window = w;
+    e->render = r;
+    e->quit_app = 0;
+
+    return 0;
 }
 
-void freeEventhandler(eventhandler_t* self)
-{
-    free(self);
+void event_handler_free(event_handler_t* e) {
+    render_free(e->render);
 }
 
-Error_t pollEvents(eventhandler_t* self)
-{
+int32_t digest_events(event_handler_t* e) {
     Error_t retCode = ERR_OK;
-    SDL_Event e;
+    SDL_Event s;
 
-    vec_3_t v = {.x = 0, .y = 0, .z = 0};
-    SDL_WaitEventTimeout(&e, POLL_EVENT_TIMEOUT_MS); // TODO: make timeout dynamic, by subtracting time needed by calculations
+    vec_3_t v = {0, 0, 0};
+    
+    SDL_WaitEventTimeout(&s, POLL_EVENT_TIMEOUT_MS); // TODO: make timeout dynamic, by subtracting time needed by calculations
     // adds up all movement that happened, and renders final result
     do {
-        switch (e.type)
+        switch (s.type)
         {
             case SDL_QUIT:
-                self->quitApp = 1;
+                e->quit_app = 1;
                 break;
             
 
             case SDL_WINDOWEVENT:
                 /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
 	        // update center of projection
-                SDL_GetWindowSize(self->pWin, &self->pRenderer->width, &self->pRenderer->height);
+                SDL_GetWindowSize(e->window, &e->render->width, &e->render->height);
             break;
         
 
             case SDL_MOUSEMOTION:
-                if(e.motion.state == SDL_BUTTON_LMASK) {
-                    v.x += (float) e.motion.xrel / 10;
-                    v.y += (float) e.motion.yrel / 10;
+                if(s.motion.state == SDL_BUTTON_LMASK) {
+                    v.x += (float) s.motion.xrel / 10;
+                    v.y -= (float) s.motion.yrel / 10; // minus because of the coordinate system being flipped, (0|0) being top left not bottom left
                 }
                 break;
 
             case SDL_MOUSEWHEEL:              
-                v.z += e.wheel.preciseY;
+                v.z += s.wheel.preciseY;
                 break;
 
 
@@ -60,10 +61,10 @@ Error_t pollEvents(eventhandler_t* self)
         
 
     }
-    } while(SDL_PollEvent(&e) > 0);
-
-    //objectMove(self->pRenderer->obj_v, v);
-    projectObjects(self->pRenderer);
+    } while(SDL_PollEvent(&s) > 0);
+ 
+    e->render->offset = v;
+    projectObjects(e->render);
 
     return retCode;
 }

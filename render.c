@@ -26,6 +26,11 @@ int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->objects = malloc(sizeof(object_t) * r->capacity_objects);
     
     r->fov_ratio = tanf(fov / 2.0);
+
+    r->orientation = matrix_3x3_identity();
+    r->offset.x = 0;
+    r->offset.y = 0;
+    r->offset.z = 0;
     
     return 0;
 }
@@ -54,6 +59,14 @@ int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec
     return 0;
 }
 
+int update_offset(render_t* r) {
+    for(int32_t i = 0; i < r->num_objects; i++) {
+        apply_vec_3(r->offset, r->objects[i].vertices_in_scene, r->objects[i].asset->v_count, r->objects[i].vertices_in_scene);
+    }
+
+    return 0;
+}
+
 void projectCentral(render_t* r) {
     float scaleFactor = fminf(r->width, r->height); // TODO: should only be calculated on WindowEvent<Resize>
     float centerx = (float) r->width / 2;
@@ -74,6 +87,11 @@ void projectCentral(render_t* r) {
 }
 
 void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
+    // execute once
+    static int i = 0;
+    if(i == 1) return;
+    i = 1;
+
     uint8_t colors[3] = {0, 127, 255};
     srand((unsigned int) time(NULL));
 
@@ -124,7 +142,7 @@ int renderScene(render_t* r) {
     for(int32_t i = 0; i < r->num_objects; i++) { 
         object_t* t = r->objects + i;
 
-        printf("Drawing %d/%d faces over %d vertices\n", t->vf_count, t->asset->f_count, t->asset->v_count);
+        // printf("Drawing %d/%d faces over %d vertices\n", t->vf_count, t->asset->f_count, t->asset->v_count);
         int ret = SDL_RenderGeometry(r->r, NULL, 
             t->proj_v, t->asset->v_count, t->visible_faces, t->vf_count * 3);
         if(ret < 0) return ret;
@@ -135,6 +153,7 @@ int renderScene(render_t* r) {
 }
 
 int projectObjects(render_t* r) {
+    update_offset(r);
     projectCentral(r);
     determineVisible(r);
     applyColor(r);

@@ -1,0 +1,2 @@
+// TODO: Einen asset manager implementieren, welcher object files on demand einliest und deallokiert
+// * wahrscheinlich eine gute wahl: hashmap verwenden welche assets verwaltet (key=asset_name/filepath, value=(asset, reference count))

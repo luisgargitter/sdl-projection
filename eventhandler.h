@@ -1,18 +1,27 @@
-#pragma once    // include guard
+#ifndef EVENT_HANDLER_H
+#define EVENT_HANDLER_H
+
+#include <stdint.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <SDL2/SDL.h>
 
 #include "types.h"
 #include "render.h"
 
-
 typedef struct{
-    SDL_Window* pWin;
-    render_t* pRenderer;
+    SDL_Window* window;
+    render_t* render;
 
-    u8 quitApp;
-    u8 initDone;
-    
-} eventhandler_t;
+    bool quit_app;
+    bool init_done;
+} event_handler_t;
 
-eventhandler_t* newEventhandler(SDL_Window* pWin, render_t* pRender);
-void freeEventhandler(eventhandler_t* self);
-Error_t pollEvents(eventhandler_t* self);
+int32_t event_handler_init(event_handler_t* event_handler, SDL_Window* window, render_t* render);
+
+void event_handler_free(event_handler_t* event_handler);
+
+int32_t digest_events(event_handler_t* event_handler_t);
+
+#endif

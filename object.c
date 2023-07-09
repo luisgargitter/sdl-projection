@@ -7,6 +7,13 @@
 #include "asset.h"
 #include "types.h"
 
+matrix_3x3_t matrix_3x3_identity() {
+    vec_3_t i1 = {1, 0, 0};
+    vec_3_t i2 = {0, 1, 0};
+    vec_3_t i3 = {0, 0, 1};
+    matrix_3x3_t m = {i1, i2, i3};
+    return m;
+}
 
 int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
     for(int32_t i = 0; i < num_vertices; i++) {
