@@ -13,10 +13,8 @@
 #define DEFAULT_FACE_COUNT 512
 
 int resize_asset(asset_t* a, int32_t vertex_count, int32_t face_count) {
-    a->v_vector = realloc(a->v_vector, sizeof(*(a->v_vector)) * vertex_count);
     //a->vn_vector = realloc(a->vn_vector, sizeof(*a->vn_vector) * vertex_count);
     //a->vt_vector = realloc(a->vt_vector, sizeof(*a->vt_vector) * vertex_count);
-    a->f_vector = realloc(a->f_vector, sizeof(*(a->f_vector)) * face_count * 3);
 
     return 0;
 }
@@ -66,10 +64,10 @@ int asset_load_obj(FILE* f, asset_t* a) {
         obj_proc_line(a, line);
         if(a->v_count >= vc) {
             vc = vc * 2;
-            resize_asset(a, vc, fc);
+            a->v_vector = realloc(a->v_vector, sizeof(*(a->v_vector)) * vc);
         } else if(a->f_count >= fc) {
             fc = fc * 2;
-            resize_asset(a, vc, fc);
+            a->f_vector = realloc(a->f_vector, sizeof(*(a->f_vector)) * fc * 3);
         }
 
         free(line);

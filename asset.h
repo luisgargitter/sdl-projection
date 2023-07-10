@@ -12,12 +12,16 @@
  * Contains Mesh and texture of an asset, that can be referenced in a scene.
  */
 typedef struct {
-    int32_t ref_count;  ///< Number of times it is being referenced
+    int32_t ref_count;  ///< Number of times it is being referenced (for automatic deallocation)
+
     int32_t v_count;	///< Number of vertices
     vec_3_t* v_vector;	///< Vector, containing the vertices (has length v_count)
+
+    int32_t vn_count;
     vec_3_t* vn_vector; ///< Vector, specifying the vertices normals (not normalized, has length v_count)
 
     SDL_Texture* t;     ///< (optional)
+    int32_t vt_count;
     vec_2_t* vt_vector; ///< Vector, specifying the vertices texture coordinates (optional, has length v_count)
 
     int32_t f_count;	    ///< Number of faces in the mesh

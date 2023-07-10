@@ -1,8 +1,8 @@
 
-LIBS = -lm -lSDL2	# Libraries
-CC = clang			# Compiler
-CFLAGS = -g -Wall   # -g for debugging, -Wall for warnings
-TARGET = main		# Name of the executable
+LIBS = -lm -lSDL2 #-lglib-2.0	# Libraries
+CC = clang						# Compiler
+CFLAGS = -g -Wall   			# -g for debugging, -Wall for warnings
+TARGET = main					# Name of the executable
 
 TEST_LIBS = -lcunit # Libraries needed for the test
 TEST_TARGET = test
