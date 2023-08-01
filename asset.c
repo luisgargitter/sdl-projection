@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "linag.h"
+
 #define DEFAULT_VERT_COUNT 512
 #define DEFAULT_FACE_COUNT 512
 
@@ -47,15 +49,18 @@ int asset_load_obj(FILE* f, asset_t* a) {
 
     bool contains_vertex_normals = false;
     bool contains_texture_coordinates = false;
-    a->v_vector = NULL;
+    a->v_vector = malloc(sizeof(*(a->v_vector)) * vc);
+    if(a->v_vector == NULL) return -1;
     a->v_count = 0;
-    a->f_vector = NULL;
+    a->f_vector = malloc(sizeof(*(a->f_vector)) * fc * 3);
+    if(a->f_vector == NULL) return -1;
     a->f_count = 0;
 
     a->vn_vector = NULL;
     a->vt_vector = NULL;
 
-    resize_asset(a, vc, fc);
+    //resize_asset(a, vc, fc);
+
 
     char* line = NULL;
     size_t n = 0;

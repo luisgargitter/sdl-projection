@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 
-#include "types.h"
+#include "linag.h"
 
 /**
  * @brief Asset in memory

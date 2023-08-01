@@ -25,6 +25,8 @@ matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
 
 matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
 
+vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
+
 int apply_mat_3x3(matrix_3x3_t matrix, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);
 
 int apply_vec_3(vec_3_t vector, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);

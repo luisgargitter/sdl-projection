@@ -4,28 +4,37 @@
 #include <stdint.h>
 
 matrix_3x3_t matrix_3x3_from_array(float a[9]) {
-    vec_3_t i1 = {a[0], a[1], a[2]};
-    vec_3_t i2 = {a[3], a[4], a[5]};
-    vec_3_t i3 = {a[6], a[7], a[8]};
-    matrix_3x3_t m = {i1, i2, i3};
+    vec_3_t c1 = {a[0], a[1], a[2]};
+    vec_3_t c2 = {a[3], a[4], a[5]};
+    vec_3_t c3 = {a[6], a[7], a[8]};
+    matrix_3x3_t m = {c1, c2, c3};
     return m;
 }
 
-float[9] matrix_3x3_to_array(matrix_3x3_t *m) {
-    
+void matrix_3x3_to_array(matrix_3x3_t m, float *f) {
+    for(int32_t i = 0; i < 3; i++) {
+        f[i + 0] = m.column_vectors[i].x;
+        f[i + 1] = m.column_vectors[i].y;
+        f[i + 2] = m.column_vectors[i].z;
+    }
 }
 
 matrix_3x3_t matrix_3x3_identity() {
-    return matrix_3x3_from_array({
+    float f[] = {
         1, 0, 0, 
         0, 1, 0, 
         0, 0, 1
-    });
+    };
+    return matrix_3x3_from_array(f);
 }
 
 matrix_3x3_t matrix_3x3_transpose(matrix_3x3_t matrix) {
-    
-    return matrix_3x3_from_array()
+    float f[9];
+    matrix_3x3_to_array(matrix, f);
+
+    // TODO: transpose matrix
+
+    return matrix_3x3_from_array(f);
 }
 
 matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
@@ -33,7 +42,6 @@ matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
 matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
 
 vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
-
 
 
 int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {

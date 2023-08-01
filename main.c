@@ -1,20 +1,23 @@
-#include <SDL2/SDL_error.h>
+// libraries in prelude
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
 
+// explicitly linked libraries
 #include <math.h>
 #include <SDL2/SDL.h>
 
-#include "types.h"
+// files in project
 #include "render.h"
-#include "cube.h"
 #include "asset.h"
 #include "object.h"
 #include "eventhandler.h"
 #include "test.h"
+#include "projection_error.h"
+
+#define PROJECTION_DEBUG // for more detailed crashreports
 
 #define TITLE "SDL-Projection"
 #define WIDTH 800
@@ -24,44 +27,38 @@
 int test_main();
 #endif
 
-#define print_n_abort(message) printf_n_abort(__LINE__, message)
-
-void printf_n_abort(int line, const char* message) {
-    printf("Fatal error in file %s, line: %d%s %s\nABORT...\n", __FILE__, line, 
-        message != NULL ? ", message: " : "" , message != NULL ? message : "");
-    abort();
-}
 
 int main(int argc, char **argv) {
-    // Initialization
-    if(SDL_Init(SDL_INIT_VIDEO ) < 0) print_n_abort(SDL_GetError());
-
-#ifdef CTEST
+    #ifdef CTEST
     printf("Unit Test Mode\n");
     test_main();
     return 0;
-#endif
+    #endif
+    
+    // Initialization
+    if(SDL_Init(SDL_INIT_VIDEO ) < 0) info_and_abort(SDL_GetError());
 
     SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    if(win == NULL) print_n_abort(SDL_GetError());
+    if(win == NULL) info_and_abort(SDL_GetError());
 
     render_t* r = malloc(sizeof(*r));
-    if(r == NULL) print_n_abort(NULL);
+    if(r == NULL) info_and_abort(NULL);
     
     // Create new renderer with FOV of 90 degrees (1,5708 rad)
-    if(render_init(r, win, M_PI / 2) < 0) print_n_abort(NULL);
+    if(render_init(r, win, M_PI / 2) < 0) info_and_abort(NULL);
 
     // TODO: fully reintegrate eventhandler to enable movement
     event_handler_t* eh = malloc(sizeof(*eh));
+    if(eh == NULL) info_and_abort(NULL);
     event_handler_init(eh, win, r);
 
     FILE* f = fopen("test_assets/teapot.obj", "rb");
-    if(f == NULL) print_n_abort(strerror(errno));
+    if(f == NULL) info_and_abort(strerror(errno));
 
     asset_t* a = malloc(sizeof(*a));
-    if(a == NULL) print_n_abort(NULL);
+    if(a == NULL) info_and_abort(NULL);
 
     asset_load_obj(f, a);
     fclose(f);

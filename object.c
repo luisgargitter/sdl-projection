@@ -5,35 +5,6 @@
 #include <stdbool.h>
 
 #include "asset.h"
-#include "types.h"
-
-matrix_3x3_t matrix_3x3_identity() {
-    vec_3_t i1 = {1, 0, 0};
-    vec_3_t i2 = {0, 1, 0};
-    vec_3_t i3 = {0, 0, 1};
-    matrix_3x3_t m = {i1, i2, i3};
-    return m;
-}
-
-int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
-    for(int32_t i = 0; i < num_vertices; i++) {
-        res[i].x = m.column_vectors[0].x * vertices[i].x + m.column_vectors[1].x * vertices[i].y + m.column_vectors[2].x * vertices[i].z;
-        res[i].y = m.column_vectors[0].y * vertices[i].x + m.column_vectors[1].y * vertices[i].y + m.column_vectors[2].y * vertices[i].z;
-        res[i].z = m.column_vectors[0].z * vertices[i].x + m.column_vectors[1].z * vertices[i].y + m.column_vectors[2].z * vertices[i].z;
-    }
-
-    return 0;
-}
-
-int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
-    for(int32_t i = 0; i < num_vertices; i++) {
-        res[i].x = v.x + vertices[i].x;
-        res[i].y = v.y + vertices[i].y;
-        res[i].z = v.z + vertices[i].z;
-    }
-
-    return 0;
-}
 
 int update_position(object_t *o, matrix_3x3_t orientation, vec_3_t offset) {
     apply_mat_3x3(orientation, o->asset->v_vector, o->asset->v_count, o->vertices_in_scene);

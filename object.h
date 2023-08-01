@@ -1,7 +1,6 @@
 #ifndef SDL_PROJECTION_OBJECT_H
 #define SDL_PROJECTION_OBJECT_H
 
-#include "types.h"
 #include "asset.h"
 
 typedef struct {

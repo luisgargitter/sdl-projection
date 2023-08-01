@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <SDL2/SDL_events.h>
 
-#include "types.h"
 #include "render.h"
 
 #define POLL_EVENT_TIMEOUT_MS   16 // 16 ms for 60 fps
@@ -22,7 +21,7 @@ void event_handler_free(event_handler_t* e) {
 }
 
 int32_t digest_events(event_handler_t* e) {
-    Error_t retCode = ERR_OK;
+    int32_t retCode = 0;
     SDL_Event s;
 
     vec_3_t v = {0, 0, 0};

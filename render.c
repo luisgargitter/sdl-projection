@@ -1,7 +1,7 @@
 #include "render.h"
-#include "types.h"
 #include "object.h"
 #include "asset.h"
+#include "projection_error.h"
 
 
 #include <SDL2/SDL_error.h>
@@ -17,13 +17,14 @@
 
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
-    if(r->r == NULL) return -1;
+    if(r->r == NULL) return -2;
 
     SDL_GetWindowSize(w, &r->width, &r->height);
 
     r->num_objects = 0;
     r->capacity_objects = DEFAULT_CAPACITY_OBJECTS;
     r->objects = malloc(sizeof(object_t) * r->capacity_objects);
+    if(r->objects == NULL) info_and_abort(NULL);
     
     r->fov_ratio = tanf(fov / 2.0);
 
