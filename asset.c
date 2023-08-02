@@ -8,17 +8,38 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "linag.h"
 
-#define DEFAULT_VERT_COUNT 512
+#define DEFAULT_VERTEX_COUNT 512
+#define DEFAULT_NORMAL_COUNT 512
+#define DEFAULT_TEXTURE_COUNT 512
 #define DEFAULT_FACE_COUNT 512
 
-int resize_asset(asset_t* a, int32_t vertex_count, int32_t face_count) {
-    //a->vn_vector = realloc(a->vn_vector, sizeof(*a->vn_vector) * vertex_count);
-    //a->vt_vector = realloc(a->vt_vector, sizeof(*a->vt_vector) * vertex_count);
+// .obj file parsing
 
-    return 0;
+int32_t obj_scan_vec_3(vec_3_t* v, char* string) {
+    // expection a string containing 3 floating point numbers
+    int32_t matched = sscanf(string, "%f %f %f", &v->x, &v->y, &v->z);
+    
+    return matched == 3 ? 0 : -1;
+}
+
+int32_t obj_scan_vec_2(vec_2_t* v, char* string) {
+    // expecting a string containing 3 floating point numbers
+    int32_t matched = sscanf(string, "%f %f", &v->x, &v->y);
+    
+    return matched == 2 ? 0 : -1;
+}
+
+int32_t obj_scan_surface(surface_t* s, char* string) { // unfinished
+    int32_t matched = sscanf(
+        string, "%d/%d/%d %d/%d/%d %d/%d/%d", 
+        s->vertex+0, s->texture+0, s->normal+0, 
+        s->vertex+1, s->texture+1, s->normal+1, 
+        s->vertex+2, s->texture+2, s->normal+2
+    );
 }
 
 int obj_proc_line(asset_t* asset, char* line) {
@@ -44,7 +65,9 @@ int obj_proc_line(asset_t* asset, char* line) {
 }
 
 int asset_load_obj(FILE* f, asset_t* a) {
-    int32_t vc = DEFAULT_VERT_COUNT;
+    int32_t vc = DEFAULT_VERTEX_COUNT;
+    int32_t nc = DEFAULT_NORMAL_COUNT;
+    int32_t vtc = DEFAULT_TEXTURE_COUNT;
     int32_t fc = DEFAULT_FACE_COUNT;
 
     bool contains_vertex_normals = false;

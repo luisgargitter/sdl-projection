@@ -1,15 +1,9 @@
 #include "render.h"
-#include "linag.h"
-#include "object.h"
-#include "asset.h"
-#include "projection_error.h"
 
-
-#include <SDL2/SDL_error.h>
+// libraries in prelude
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <time.h>
 
 #include <SDL2/SDL.h>
