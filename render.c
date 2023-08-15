@@ -1,4 +1,5 @@
 #include "render.h"
+#include "linag.h"
 #include "object.h"
 #include "asset.h"
 #include "projection_error.h"
@@ -60,9 +61,13 @@ int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec
     return 0;
 }
 
-int update_offset(render_t* r) {
+int render_position(render_t* r) {
     for(int32_t i = 0; i < r->num_objects; i++) {
-        apply_vec_3(r->offset, r->objects[i].vertices_in_scene, r->objects[i].asset->v_count, r->objects[i].vertices_in_scene);
+        object_position(
+            r->objects + i,
+            matrix_3x3_multiply(r->orientation, r->objects[i].orientation), 
+            vec_3_add(r->offset, r->objects[i].offset)
+        );
     }
 
     return 0;
@@ -107,7 +112,7 @@ void applyColor(render_t* r) { // temp function for testing. will be replaced by
     }
 }
 
-void determineVisible(render_t* r) {
+void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_t* t = r->objects + i;
         t->vf_count = 0;
@@ -154,7 +159,7 @@ int renderScene(render_t* r) {
 }
 
 int projectObjects(render_t* r) {
-    update_offset(r);
+    render_position(r);
     projectCentral(r);
     determineVisible(r);
     applyColor(r);

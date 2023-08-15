@@ -1,8 +1,12 @@
 #include "eventhandler.h"
 
 #include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
+
 #include <SDL2/SDL_events.h>
 
+#include "linag.h"
 #include "render.h"
 
 #define POLL_EVENT_TIMEOUT_MS   16 // 16 ms for 60 fps
@@ -11,22 +15,35 @@
 int32_t event_handler_init(event_handler_t* e, SDL_Window* w, render_t* r) {
     e->window = w;
     e->render = r;
-    e->quit_app = 0;
+    e->time_of_last_frame = 0;
+
+    e->quit_app = false;
 
     return 0;
 }
 
 void event_handler_free(event_handler_t* e) {
     render_free(e->render);
+    free(e->render);
+}
+
+int64_t millis() {
+    struct timespec now;
+    timespec_get(&now, TIME_UTC);
+    return ((int64_t) now.tv_sec) * 1000 + ((int64_t) now.tv_nsec) / 1000000;
 }
 
 int32_t digest_events(event_handler_t* e) {
     int32_t retCode = 0;
     SDL_Event s;
+    static float r = 0;
+    static int64_t time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
 
+    vec_3_t vo = {0, 0, 0};
     vec_3_t v = {0, 0, 0};
-    
-    SDL_WaitEventTimeout(&s, POLL_EVENT_TIMEOUT_MS); // TODO: make timeout dynamic, by subtracting time needed by calculations
+
+    if(time_since_last_frame > POLL_EVENT_TIMEOUT_MS) time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
+    SDL_WaitEventTimeout(&s, POLL_EVENT_TIMEOUT_MS - time_since_last_frame);
     // adds up all movement that happened, and renders final result
     do {
         switch (s.type)
@@ -62,8 +79,16 @@ int32_t digest_events(event_handler_t* e) {
     }
     } while(SDL_PollEvent(&s) > 0);
  
-    e->render->offset = v;
-    projectObjects(e->render);
+    e->render->offset = vec_3_add(e->render->offset, v);
+
+    int64_t t = millis();
+    time_since_last_frame = t - e->time_of_last_frame;
+    e->time_of_last_frame = t;
+
+    retCode = projectObjects(e->render);
+
+    r += 0.01;
+    e->render->objects->orientation = matrix_3x3_rotation(0, r, 0);
 
     return retCode;
 }

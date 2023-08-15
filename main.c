@@ -10,6 +10,7 @@
 #include <SDL2/SDL.h>
 
 // files in project
+#include "linag.h"
 #include "render.h"
 #include "asset.h"
 #include "object.h"
@@ -66,13 +67,12 @@ int main(int argc, char **argv) {
     vec_3_t c1 = {.x = 0.71, .y = 0, .z = -0.71};
     vec_3_t c2 = {.x = 0, .y = 1, .z = 0};
     vec_3_t c3 = {.x = 0.71, .y = 0, .z = 0.71};
-    matrix_3x3_t m = {c1, c2, c3};
+    matrix_3x3_t m = matrix_3x3_rotation(0, 0, 0);
 
-    vec_3_t v = {0, -3, 10};
+    vec_3_t v = {0, 0, 10};
     
     render_add_object(r, a, m, v);
 
-    
     while(eh->quit_app == false) {
         digest_events(eh);
     }

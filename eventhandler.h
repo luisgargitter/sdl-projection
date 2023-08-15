@@ -13,6 +13,8 @@ typedef struct{
     SDL_Window* window;
     render_t* render;
 
+    int64_t time_of_last_frame;
+
     bool quit_app;
     bool init_done;
 } event_handler_t;

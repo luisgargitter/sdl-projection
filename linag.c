@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#include <math.h>
 
 matrix_3x3_t matrix_3x3_from_array(float a[9]) {
     vec_3_t c1 = {a[0], a[1], a[2]};
@@ -13,9 +16,9 @@ matrix_3x3_t matrix_3x3_from_array(float a[9]) {
 
 void matrix_3x3_to_array(matrix_3x3_t m, float *f) {
     for(int32_t i = 0; i < 3; i++) {
-        f[i + 0] = m.column_vectors[i].x;
-        f[i + 1] = m.column_vectors[i].y;
-        f[i + 2] = m.column_vectors[i].z;
+        f[i * 3 + 0] = m.column_vectors[i].x;
+        f[i * 3 + 1] = m.column_vectors[i].y;
+        f[i * 3 + 2] = m.column_vectors[i].z;
     }
 }
 
@@ -37,9 +40,44 @@ matrix_3x3_t matrix_3x3_transpose(matrix_3x3_t matrix) {
     return matrix_3x3_from_array(f);
 }
 
-matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
+matrix_3x3_t matrix_3x3_rotation(float x, float y, float z) {
+    float f[9] = {
+        cosf(y) * cosf(z), 
+        sinf(x) * sinf(y) * cosf(z) - cosf(x) * sinf(z), 
+        cosf(x) * sinf(y) * cosf(z) + sinf(x) * sinf(z),
+        
+        cosf(y) * sinf(z),
+        sinf(x) * sinf(y) * sinf(z) + cosf(x) * cosf(z),
+        cosf(x) * sinf(y) * sinf(z) - sinf(x) * cosf(z),
 
-matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
+        -sinf(y),
+        sinf(x) * cosf(y),
+        cosf(x) * cosf(y)
+    };
+
+    return matrix_3x3_from_array(f);
+}
+
+matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2) {
+    return matrix_3x3_identity();
+}
+
+matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2) {
+    float m1[9], m2[9], res[9];
+    matrix_3x3_to_array(matrix1, m1);
+    matrix_3x3_to_array(matrix2, m2);
+
+    for(int32_t i = 0; i < 3; i++) {
+        for(int32_t j = 0; j < 3; j++) {
+            res[i * 3 + j] = 0;
+            for(int32_t k = 0; k < 3; k++) {
+                res[i * 3 + j] += m1[i * 3 + k] * m2[j + k * 3];  
+            }
+        }
+    }
+
+    return matrix_3x3_from_array(res);
+}
 
 vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
 
@@ -62,4 +100,13 @@ int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res
     }
 
     return 0;
+}
+
+vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2) {
+    vec_3_t r;
+    r.x = v1.x + v2.x;
+    r.y = v1.y + v2.y;
+    r.z = v1.z + v2.z;
+
+    return r;
 }
