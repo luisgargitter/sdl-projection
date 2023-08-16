@@ -18,7 +18,7 @@
 
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
-    if(r->r == NULL) return -2;
+    if(r->r == NULL) info_and_abort(SDL_GetError());
 
     SDL_GetWindowSize(w, &r->width, &r->height);
 
@@ -28,6 +28,7 @@ int render_init(render_t* r, SDL_Window *w, float_t fov) {
     if(r->objects == NULL) info_and_abort(NULL);
     
     r->fov_ratio = tanf(fov / 2.0);
+    r->scaled_fov = fminf(r->width, r->height) * r->fov_ratio;
 
     r->orientation = matrix_3x3_identity();
     r->offset.x = 0;
@@ -75,18 +76,16 @@ int render_position(render_t* r) {
 }
 
 void projectCentral(render_t* r) {
-    float scaleFactor = fminf(r->width, r->height); // TODO: should only be calculated on WindowEvent<Resize>
     float centerx = (float) r->width / 2;
     float centery = (float) r->height / 2;
-    float scaled_fov = scaleFactor * r->fov_ratio;
 
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_t* o = r->objects + i;
         vec_3_t* v = o->vertices_in_scene;
 
         for(int32_t j = 0; j < o->asset->v_count; j++) {
-            o->proj_v[j].position.x = (v[j].x / v[j].z) * scaled_fov + centerx;
-            o->proj_v[j].position.y = r->height - ((v[j].y / v[j].z) * scaled_fov + centery);
+            o->proj_v[j].position.x = (v[j].x / v[j].z) * r->scaled_fov + centerx;
+            o->proj_v[j].position.y = r->height - ((v[j].y / v[j].z) * r->scaled_fov + centery);
 
             //printf("%f %f\n", o->proj_v[j].position.x, o->proj_v[j].position.y);
         }

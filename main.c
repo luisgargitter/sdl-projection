@@ -69,9 +69,7 @@ int main(int argc, char **argv) {
     
     render_add_object(r, a, m, v);
 
-    while(eh->quit_app == false) {
-        digest_events(eh);
-    }
+    while(eh->quit_app == false) digest_events(eh);
 
     // cleanup
     event_handler_free(eh);

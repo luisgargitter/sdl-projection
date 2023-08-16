@@ -17,7 +17,8 @@ typedef struct {
     int32_t width;		        ///< Window width
     int32_t height;		        ///< Window height
     float_t fov_ratio;	        ///< FOV as ratio of the width or height to the depth of the "camera"
-    
+    float_t scaled_fov;
+
     int32_t num_objects;        ///< Number of objects that are to be rendered
     int32_t capacity_objects;	///< Capacity of the objects array
     object_t* objects;          ///< Vector containing the objects to be rendered

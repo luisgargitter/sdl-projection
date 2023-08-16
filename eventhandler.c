@@ -27,7 +27,7 @@ void event_handler_free(event_handler_t* e) {
     free(e->render);
 }
 
-int64_t millis() { // copy paste from stackoverflow (seems to be working)
+int64_t millis() { // copy pasta from stackoverflow (seems to be working)
     struct timespec now;
     timespec_get(&now, TIME_UTC);
     return ((int64_t) now.tv_sec) * 1000 + ((int64_t) now.tv_nsec) / 1000000;
@@ -55,6 +55,7 @@ int32_t digest_events(event_handler_t* e) {
                 /* if a resizing window event was triggered, just re-draw the object to fill the empty space */
 	            // update center of projection
                 SDL_GetWindowSize(e->window, &e->render->width, &e->render->height);
+                e->render->scaled_fov = fminf(e->render->width, e->render->height) * e->render->fov_ratio;
                 break;
         
             case SDL_MOUSEMOTION:
@@ -79,8 +80,9 @@ int32_t digest_events(event_handler_t* e) {
     time_since_last_frame = t - e->time_of_last_frame;
     e->time_of_last_frame = t;
 
+    // rotating the first object for demonstration purposes.
     r += 0.01;
-    e->render->objects->orientation = matrix_3x3_rotation(0, r, 0);
+    e->render->objects->orientation = matrix_3x3_rotation(r/3, r, r/2);
     
     retCode = projectObjects(e->render);
 

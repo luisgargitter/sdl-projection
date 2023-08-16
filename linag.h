@@ -12,10 +12,8 @@ typedef struct {
 } vec_3_t;
 
 typedef struct {
-    vec_3_t column_vectors[3];
+    float m[9];
 } matrix_3x3_t;
-
-matrix_3x3_t matrix_3x3_from_array(float array[9]);
 
 matrix_3x3_t matrix_3x3_identity();
 
