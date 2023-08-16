@@ -54,6 +54,7 @@ int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec
         r->capacity_objects *= 2;
         r->objects = realloc(r->objects, r->capacity_objects);
     }
+    if(r->objects == NULL) info_and_abort("NULLPTR");
 
     object_init(r->objects + r->num_objects, asset, orientation, offset);
     r->num_objects++;

@@ -59,16 +59,12 @@ int main(int argc, char **argv) {
     if(f == NULL) info_and_abort(strerror(errno));
 
     asset_t* a = malloc(sizeof(*a));
-    if(a == NULL) info_and_abort(NULL);
+    if(a == NULL) info_and_abort("NULLPTR");
 
-    asset_load_obj(f, a);
+    if(asset_load_obj(f, a) < 0) info_and_abort("ASSETLOADERR");
     fclose(f);
 
-    vec_3_t c1 = {.x = 0.71, .y = 0, .z = -0.71};
-    vec_3_t c2 = {.x = 0, .y = 1, .z = 0};
-    vec_3_t c3 = {.x = 0.71, .y = 0, .z = 0.71};
     matrix_3x3_t m = matrix_3x3_rotation(0, 0, 0);
-
     vec_3_t v = {0, 0, 10};
     
     render_add_object(r, a, m, v);
@@ -76,8 +72,6 @@ int main(int argc, char **argv) {
     while(eh->quit_app == false) {
         digest_events(eh);
     }
-    
-    //if(projectObjects(r)) print_n_abort(SDL_GetError());
 
     // cleanup
     event_handler_free(eh);
