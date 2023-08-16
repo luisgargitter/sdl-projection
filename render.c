@@ -8,6 +8,9 @@
 
 #include <SDL2/SDL.h>
 
+#include "asset.h"
+#include "projection_error.h"
+
 #define DEFAULT_CAPACITY_OBJECTS 32
 
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
@@ -112,22 +115,22 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
         t->vf_count = 0;
 
         for(int32_t f = 0; f < t->asset->f_count; f++){
-            int32_t* currentSurf = t->asset->f_vector + f * 3;
+            surface_t* currentSurf = t->asset->f_vector + f;
 
 	        //Compute the Z component of the cross product of v1->v3 and v1->v2
 		
-	        float zComp = ((t->proj_v[currentSurf[2]].position.x - t->proj_v[currentSurf[0]].position.x) //v1->v3's X coord
-		    * (t->proj_v[currentSurf[1]].position.y - t->proj_v[currentSurf[0]].position.y)) //v1->v2's Y coord
-		    - ((t->proj_v[currentSurf[2]].position.y - t->proj_v[currentSurf[0]].position.y) //v1->v3's Y coord
-		    * (t->proj_v[currentSurf[1]].position.x - t->proj_v[currentSurf[0]].position.x)); //v1->v2's X coord
+	        float zComp = ((t->proj_v[currentSurf->vertex[2]].position.x - t->proj_v[currentSurf->vertex[0]].position.x) //v1->v3's X coord
+		    * (t->proj_v[currentSurf->vertex[1]].position.y - t->proj_v[currentSurf->vertex[0]].position.y)) //v1->v2's Y coord
+		    - ((t->proj_v[currentSurf->vertex[2]].position.y - t->proj_v[currentSurf->vertex[0]].position.y) //v1->v3's Y coord
+		    * (t->proj_v[currentSurf->vertex[1]].position.x - t->proj_v[currentSurf->vertex[0]].position.x)); //v1->v2's X coord
 		
 		
 	        if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
 	        {
 	            int32_t* temp = t->visible_faces + t->vf_count * 3;
-                temp[0] = currentSurf[0];
-                temp[1] = currentSurf[1];
-                temp[2] = currentSurf[2];
+                temp[0] = currentSurf->vertex[0];
+                temp[1] = currentSurf->vertex[1];
+                temp[2] = currentSurf->vertex[2];
                 t->vf_count++;
 	        }
 	    }
@@ -142,10 +145,11 @@ int renderScene(render_t* r) {
     for(int32_t i = 0; i < r->num_objects; i++) { 
         object_t* t = r->objects + i;
 
-        // printf("Drawing %d/%d faces over %d vertices\n", t->vf_count, t->asset->f_count, t->asset->v_count);
+        //printf("Drawing %d/%d faces over %d vertices\n", t->vf_count, t->asset->f_count, t->asset->v_count);
+        
         int ret = SDL_RenderGeometry(r->r, NULL, 
             t->proj_v, t->asset->v_count, t->visible_faces, t->vf_count * 3);
-        if(ret < 0) return ret;
+        //if(ret < 0) info_and_abort(SDL_GetError());
     }
     SDL_RenderPresent(r->r);
 

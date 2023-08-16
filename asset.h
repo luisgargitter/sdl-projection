@@ -11,12 +11,11 @@
  * 
  * Contains Mesh and texture of an asset, that can be referenced in a scene.
  */
-typedef struct {
-    int32_t count; ///< specifies number of vertices of face
 
-    int32_t* vertex; ///< vertex indices
-    int32_t* normal; ///< vertex normal indices of corresponding vertex
-    int32_t* texture; ///< vertex texture indices of corresponding vertex
+typedef struct {
+    int32_t vertex[3]; ///< vertex indices
+    int32_t normal[3]; ///< vertex normal indices of corresponding vertex
+    int32_t texture[3]; ///< vertex texture indices of corresponding vertex
 } surface_t;
 
 typedef struct {
