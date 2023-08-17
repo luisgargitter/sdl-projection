@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     fclose(f);
 
     matrix_3x3_t m = matrix_3x3_rotation(0, 0, 0);
-    vec_3_t v = {0, 0, 10};
+    vec_3_t v = {0, 0, 0};
     
     render_add_object(r, a, m, v);
 

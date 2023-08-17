@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 
 #include <SDL2/SDL.h>
@@ -64,9 +65,16 @@ int render_position(render_t* r) {
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_position(
             r->objects + i,
-            matrix_3x3_multiply(r->orientation, r->objects[i].orientation), 
-            vec_3_add(r->offset, r->objects[i].offset)
+            r->objects[i].orientation, 
+            r->objects[i].offset
         );
+        apply_vec_3(
+            r->offset,
+            r->objects[i].vertices_in_scene, 
+            r->objects[i].asset->v_count, 
+            r->objects[i].vertices_in_scene
+        );
+        apply_mat_3x3(r->orientation, r->objects[i].vertices_in_scene, r->objects[i].asset->v_count, r->objects[i].vertices_in_scene);
     }
 
     return 0;
@@ -109,6 +117,14 @@ void applyColor(render_t* r) { // temp function for testing. will be replaced by
     }
 }
 
+bool surface_is_in_front_of_camera(object_t object, surface_t surface) {
+    for(int32_t i = 0; i < 3; i++) {
+        if(object.vertices_in_scene[surface.vertex[i]].z > 0) return true;
+    }
+
+    return false;
+}
+
 void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_t* t = r->objects + i;
@@ -124,8 +140,8 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
 		    - ((t->proj_v[currentSurf->vertex[2]].position.y - t->proj_v[currentSurf->vertex[0]].position.y) //v1->v3's Y coord
 		    * (t->proj_v[currentSurf->vertex[1]].position.x - t->proj_v[currentSurf->vertex[0]].position.x)); //v1->v2's X coord
 		
-		
-	        if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
+
+	        if(zComp < 0 && surface_is_in_front_of_camera(*t, *currentSurf)) //If Z component of the normal vector is <0, that means the face is pointing towards us
 	        {
 	            int32_t* temp = t->visible_faces + t->vf_count * 3;
                 temp[0] = currentSurf->vertex[0];

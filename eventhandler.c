@@ -27,7 +27,7 @@ void event_handler_free(event_handler_t* e) {
     free(e->render);
 }
 
-int64_t millis() { // copy pasta from stackoverflow (seems to be working)
+int64_t millis() { // copy paste from stackoverflow (seems to be working)
     struct timespec now;
     timespec_get(&now, TIME_UTC);
     return ((int64_t) now.tv_sec) * 1000 + ((int64_t) now.tv_nsec) / 1000000;
@@ -36,7 +36,8 @@ int64_t millis() { // copy pasta from stackoverflow (seems to be working)
 int32_t digest_events(event_handler_t* e) {
     int32_t retCode = 0;
     SDL_Event s;
-    static float r = 0;
+    static float angx = 0;
+    static float angy = 0;
     static int64_t time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
 
     vec_3_t v = {0, 0, 0};
@@ -60,8 +61,8 @@ int32_t digest_events(event_handler_t* e) {
         
             case SDL_MOUSEMOTION:
                 if(s.motion.state == SDL_BUTTON_LMASK) {
-                    v.x += (float) s.motion.xrel / 10;
-                    v.y -= (float) s.motion.yrel / 10; // minus because of the coordinate system being flipped, (0|0) being top left not bottom left
+                    angx += (float) s.motion.xrel / 100.0;
+                    angy += (float) s.motion.yrel / 100.0; // minus because of the coordinate system being flipped, (0|0) being top left not bottom left
                 }
                 break;
 
@@ -74,15 +75,13 @@ int32_t digest_events(event_handler_t* e) {
         }
     } while(SDL_PollEvent(&s) > 0);
  
-    e->render->offset = vec_3_add(e->render->offset, v);
+    e->render->orientation = matrix_3x3_multiply(matrix_3x3_rotation(0, angx, 0), matrix_3x3_rotation(angy, 0, 0));
+    e->render->offset = vec_3_add(e->render->offset, matrix_3x3_apply(matrix_3x3_multiply(matrix_3x3_rotation(0, -angx, 0), matrix_3x3_rotation(-angy, 0, 0)), v));
 
     int64_t t = millis();
     time_since_last_frame = t - e->time_of_last_frame;
     e->time_of_last_frame = t;
 
-    // rotating the first object for demonstration purposes.
-    r += 0.01;
-    e->render->objects->orientation = matrix_3x3_rotation(r/3, r, r/2);
     
     retCode = projectObjects(e->render);
 
