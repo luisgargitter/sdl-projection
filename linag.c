@@ -98,3 +98,9 @@ int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res
     return 0;
 }
 
+float vec_euclidean_len(vec_3_t v)
+{
+    float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
+    return sqrtf(len);
+}
+
