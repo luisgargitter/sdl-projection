@@ -25,6 +25,7 @@ int object_init(object_t* o, asset_t* a, matrix_3x3_t orientation, vec_3_t offse
     o->vertices_in_scene = malloc(sizeof(*o->vertices_in_scene) * o->asset->v_count);
     o->proj_v = malloc(sizeof(*o->proj_v) * o->asset->v_count);
     o->visible_faces = malloc(sizeof(*o->visible_faces) * o->asset->f_count * 3);
+    o->vf_sortable = malloc(sizeof(sortable_triangle) * o->asset->f_count);
 
     return 0;
 }
@@ -42,4 +43,7 @@ void object_free(object_t* o) {
 
     free(o->visible_faces);
     o->visible_faces = NULL;
+
+    free(o->vf_sortable);
+    o->vf_sortable = NULL;
 }

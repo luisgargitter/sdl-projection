@@ -1,6 +1,7 @@
 #include "render.h"
 
 // libraries in prelude
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,6 +11,8 @@
 #include <SDL2/SDL.h>
 
 #include "asset.h"
+#include "linag.h"
+#include "object.h"
 #include "projection_error.h"
 
 #define DEFAULT_CAPACITY_OBJECTS 32
@@ -117,12 +120,18 @@ void applyColor(render_t* r) { // temp function for testing. will be replaced by
     }
 }
 
-bool surface_is_in_front_of_camera(object_t object, surface_t surface) {
-    for(int32_t i = 0; i < 3; i++) {
-        if(object.vertices_in_scene[surface.vertex[i]].z > 0) return true;
-    }
+int compFaces(const void* f1, const void* f2) {
+    sortable_triangle* st1 = (sortable_triangle*)f1;
+    sortable_triangle* st2 = (sortable_triangle*)f2;
+    if (st1->farthest == st2->farthest)
+        return 0;
+    if (st1->farthest < st2->farthest)
+        return 1;
+    return -1;
+}
 
-    return false;
+void sortFaces(object_t* obj) {
+    qsort(obj->vf_sortable, obj->vf_count, sizeof(sortable_triangle), compFaces);
 }
 
 void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
@@ -140,16 +149,31 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
 		    - ((t->proj_v[currentSurf->vertex[2]].position.y - t->proj_v[currentSurf->vertex[0]].position.y) //v1->v3's Y coord
 		    * (t->proj_v[currentSurf->vertex[1]].position.x - t->proj_v[currentSurf->vertex[0]].position.x)); //v1->v2's X coord
 		
-
-	        if(zComp < 0 && surface_is_in_front_of_camera(*t, *currentSurf)) //If Z component of the normal vector is <0, that means the face is pointing towards us
+		
+	        if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
 	        {
-	            int32_t* temp = t->visible_faces + t->vf_count * 3;
-                temp[0] = currentSurf->vertex[0];
-                temp[1] = currentSurf->vertex[1];
-                temp[2] = currentSurf->vertex[2];
+                t->vf_sortable[t->vf_count].p1 = currentSurf->vertex[0];
+                t->vf_sortable[t->vf_count].p2 = currentSurf->vertex[1];
+                t->vf_sortable[t->vf_count].p3 = currentSurf->vertex[2];
+                vec_3_t* v = t->vertices_in_scene;
+                //Get the distance of each 3D vertex (not projected) of the triangle, and compare
+                float_t dist1 = vec_euclidean_len(v[currentSurf->vertex[0]]);
+                float_t dist2 = vec_euclidean_len(v[currentSurf->vertex[1]]);
+                float_t dist3 = vec_euclidean_len(v[currentSurf->vertex[2]]);
+                float_t max = fmaxf(dist1, dist2);
+                max = fmaxf(max, dist3);
+                t->vf_sortable[t->vf_count].farthest = max;
                 t->vf_count++;
 	        }
-	    }
+        }
+        sortFaces(t);
+        //Convert sortable faces to list of integers, as required by SDL
+        for (int32_t f = 0; f < t->vf_count; f++) {
+            int32_t* temp = t->visible_faces + f * 3;
+            temp[0] = t->vf_sortable[f].p1;
+            temp[1] = t->vf_sortable[f].p2;
+            temp[2] = t->vf_sortable[f].p3;
+        }
     }
 }
 

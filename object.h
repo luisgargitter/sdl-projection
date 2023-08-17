@@ -11,6 +11,7 @@ typedef struct {
     vec_3_t* vertices_in_scene;
     SDL_Vertex* proj_v;
     int32_t* visible_faces; // stored as int triplets
+    sortable_triangle* vf_sortable;
     int32_t vf_count;
 } object_t;
 
