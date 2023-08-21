@@ -148,23 +148,28 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
 		    * (t->proj_v[currentSurf->vertex[1]].position.y - t->proj_v[currentSurf->vertex[0]].position.y)) //v1->v2's Y coord
 		    - ((t->proj_v[currentSurf->vertex[2]].position.y - t->proj_v[currentSurf->vertex[0]].position.y) //v1->v3's Y coord
 		    * (t->proj_v[currentSurf->vertex[1]].position.x - t->proj_v[currentSurf->vertex[0]].position.x)); //v1->v2's X coord
-		
-		
-	        if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
-	        {
-                t->vf_sortable[t->vf_count].p1 = currentSurf->vertex[0];
-                t->vf_sortable[t->vf_count].p2 = currentSurf->vertex[1];
-                t->vf_sortable[t->vf_count].p3 = currentSurf->vertex[2];
-                vec_3_t* v = t->vertices_in_scene;
-                //Get the distance of each 3D vertex (not projected) of the triangle, and compare
-                float_t dist1 = vec_euclidean_len(v[currentSurf->vertex[0]]);
-                float_t dist2 = vec_euclidean_len(v[currentSurf->vertex[1]]);
-                float_t dist3 = vec_euclidean_len(v[currentSurf->vertex[2]]);
-                float_t max = fmaxf(dist1, dist2);
-                max = fmaxf(max, dist3);
-                t->vf_sortable[t->vf_count].farthest = max;
-                t->vf_count++;
-	        }
+
+            vec_3_t *v = t->vertices_in_scene;
+            if (zComp < 0 && (v[currentSurf->vertex[0]].z >= 0 ||
+                v[currentSurf->vertex[1]].z >= 0 ||
+                v[currentSurf->vertex[2]].z >= 0))
+              // If Z component of the normal vector is <0, that means the face
+              // is pointing towards us
+              // Also, if all Z components of the vertices of a given triangle are negative, that means the whole triangle is behind the camera (and needs not be drawn)
+            {
+              t->vf_sortable[t->vf_count].p1 = currentSurf->vertex[0];
+              t->vf_sortable[t->vf_count].p2 = currentSurf->vertex[1];
+              t->vf_sortable[t->vf_count].p3 = currentSurf->vertex[2];
+              // Get the distance of each 3D vertex (not projected) of the
+              // triangle, and compare
+              float_t dist1 = vec_euclidean_len(v[currentSurf->vertex[0]]);
+              float_t dist2 = vec_euclidean_len(v[currentSurf->vertex[1]]);
+              float_t dist3 = vec_euclidean_len(v[currentSurf->vertex[2]]);
+              float_t max = fmaxf(dist1, dist2);
+              max = fmaxf(max, dist3);
+              t->vf_sortable[t->vf_count].farthest = max;
+              t->vf_count++;
+            }
         }
         sortFaces(t);
         //Convert sortable faces to list of integers, as required by SDL

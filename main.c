@@ -65,9 +65,15 @@ int main(int argc, char **argv) {
     fclose(f);
 
     matrix_3x3_t m = matrix_3x3_rotation(0, 0, 0);
-    vec_3_t v = {0, 0, 0};
-    
+    vec_3_t v = {0, 27, 60};
+    vec_3_t v2 = {0, 0, 40};
+    vec_3_t v3 = {17, 0, 70};
+    vec_3_t v4 = {-17, 0, 70};
+
     render_add_object(r, a, m, v);
+    render_add_object(r, a, m, v2);
+    render_add_object(r, a, m, v3);
+    render_add_object(r, a, m, v4);
 
     while(eh->quit_app == false) digest_events(eh);
 

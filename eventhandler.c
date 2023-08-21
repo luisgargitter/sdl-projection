@@ -61,8 +61,15 @@ int32_t digest_events(event_handler_t* e) {
         
             case SDL_MOUSEMOTION:
                 if(s.motion.state == SDL_BUTTON_LMASK) {
-                    angx += (float) s.motion.xrel / 100.0;
-                    angy += (float) s.motion.yrel / 100.0; // minus because of the coordinate system being flipped, (0|0) being top left not bottom left
+                    angx += (float) s.motion.xrel / 200.0;
+                    angy += (float) s.motion.yrel / 200.0; // minus because of the coordinate system being flipped, (0|0) being top left not bottom left
+                } else if (s.motion.state == SDL_BUTTON_RMASK) {
+                  vec_3_t vector = {
+                    (float)s.motion.xrel / 10,
+                    (float)s.motion.yrel / -10,
+                    0};
+                  //vector = matrix_3x3_apply(e->render->orientation, vector);
+                  v = vec_3_add(v, vector);
                 }
                 break;
 
@@ -74,15 +81,20 @@ int32_t digest_events(event_handler_t* e) {
                 break;
         }
     } while(SDL_PollEvent(&s) > 0);
- 
-    e->render->orientation = matrix_3x3_multiply(matrix_3x3_rotation(0, angx, 0), matrix_3x3_rotation(angy, 0, 0));
+
+    e->render->orientation = matrix_3x3_multiply(
+        matrix_3x3_rotation(angy, 0, 0), matrix_3x3_rotation(0, angx, 0));
     e->render->offset = vec_3_add(e->render->offset, matrix_3x3_apply(matrix_3x3_multiply(matrix_3x3_rotation(0, -angx, 0), matrix_3x3_rotation(-angy, 0, 0)), v));
 
     int64_t t = millis();
     time_since_last_frame = t - e->time_of_last_frame;
     e->time_of_last_frame = t;
 
-    
+    // rotating the first object along the Y-axis (vertical axis) for orientation purposes.
+    static float r = 0;
+    r += 0.01;
+    e->render->objects->orientation = matrix_3x3_rotation(0, r, 0);
+
     retCode = projectObjects(e->render);
 
     return retCode;
