@@ -31,14 +31,42 @@ matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
 
 vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
 
-matrix_3x3_t matrix_3x3_rotation(float x, float y, float z);
+matrix_3x3_t matrix_3x3_rotation(vec_3_t v);
 
 int apply_mat_3x3(matrix_3x3_t matrix, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);
 
 int apply_vec_3(vec_3_t vector, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);
 
+vec_3_t vec_3(float x, float y, float z);
+
+vec_3_t vec_3_identity();
+
 vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2);
 
-float vec_euclidean_len(vec_3_t v);
+vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2);
+
+vec_2_t vec_3_map_to_plane(vec_3_t v);
+
+float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2);
+
+// ----- GENERICS -----
+
+#define ladd(X, Y) _Generic((X),            \
+    matrix_3x3_t: matrix_3x3_add,           \
+    vec_3_t: vec_3_add                      \
+)(X, Y)
+
+#define lsub(X, Y) _Generic((X),            \
+    vec_3_t: vec_3_subtract                 \
+)(X, Y)
+
+#define lmul(X, Y) _Generic((Y),            \
+    matrix_3x3_t: matrix_3x3_multiply,      \
+    vec_3_t: matrix_3x3_apply               \
+)(X, Y)
+
+#define leud(X, Y) _Generic((X),            \
+    vec_3_t: vec_3_euclidean_distance       \
+)(X, Y)
 
 #endif

@@ -22,7 +22,11 @@ matrix_3x3_t matrix_3x3_transpose(matrix_3x3_t matrix) {
     return matrix;
 }
 
-matrix_3x3_t matrix_3x3_rotation(float x, float y, float z) {
+matrix_3x3_t matrix_3x3_rotation(vec_3_t v) {
+    float x = v.x;
+    float y = v.y;
+    float z = v.z;
+
     matrix_3x3_t r = {{
         cosf(y) * cosf(z), 
         sinf(x) * sinf(y) * cosf(z) - cosf(x) * sinf(z), 
@@ -72,6 +76,16 @@ vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector) {
     return r;
 }
 
+vec_3_t vec_3(float x, float y, float z) {
+    vec_3_t v = {x, y, z};
+    return v;
+}
+
+vec_3_t vec_3_identity() {
+    vec_3_t v = {0, 0, 0};
+    return v;
+}
+
 vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2) {
     vec_3_t r = {
         v1.x + v2.x,
@@ -82,9 +96,24 @@ vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2) {
     return r;
 }
 
+vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2) {
+    vec_3_t r = {
+        v1.x - v2.x,
+        v1.y - v2.y,
+        v1.z - v2.z
+    };
+
+    return r;
+}
+
+vec_2_t vec_3_map_to_plane(vec_3_t v) {
+    vec_2_t v2 = {v.x / v.z, v.y / v.z};
+    return v2;
+}
+
 int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
     for(int32_t i = 0; i < num_vertices; i++) {
-        res[i] = matrix_3x3_apply(m, vertices[i]);
+        res[i] = lmul(m, vertices[i]);
     }
 
     return 0;
@@ -92,14 +121,14 @@ int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices,
 
 int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
     for(int32_t i = 0; i < num_vertices; i++) {
-        res[i] = vec_3_add(v, vertices[i]);
+        res[i] = ladd(v, vertices[i]);
     }
 
     return 0;
 }
 
-float vec_euclidean_len(vec_3_t v)
-{
+float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2) {
+    vec_3_t v = lsub(v1, v2);
     float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
     return sqrtf(len);
 }

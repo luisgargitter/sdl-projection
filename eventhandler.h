@@ -17,6 +17,9 @@ typedef struct{
 
     bool quit_app;
     bool init_done;
+
+    float x_angle;
+    float y_angle;
 } event_handler_t;
 
 int32_t event_handler_init(event_handler_t* event_handler, SDL_Window* window, render_t* render);

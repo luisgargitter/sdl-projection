@@ -17,6 +17,9 @@
 
 #define DEFAULT_CAPACITY_OBJECTS 32
 
+// temporary
+#define SDL_TERM_DEBUG
+
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
     if(r->r == NULL) info_and_abort(SDL_GetError());
@@ -31,10 +34,8 @@ int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->fov_ratio = tanf(fov / 2.0);
     r->scaled_fov = fminf(r->width, r->height) * r->fov_ratio;
 
-    r->orientation = matrix_3x3_identity();
-    r->offset.x = 0;
-    r->offset.y = 0;
-    r->offset.z = 0;
+    r->orientation = matrix_3x3_rotation(vec_3(0, 0, 0));
+    r->offset = vec_3(0, 0, 0);
     
     return 0;
 }
@@ -92,8 +93,9 @@ void projectCentral(render_t* r) {
         vec_3_t* v = o->vertices_in_scene;
 
         for(int32_t j = 0; j < o->asset->v_count; j++) {
-            o->proj_v[j].position.x = (v[j].x / v[j].z) * r->scaled_fov + centerx;
-            o->proj_v[j].position.y = r->height - ((v[j].y / v[j].z) * r->scaled_fov + centery);
+            vec_2_t v2 = vec_3_map_to_plane(v[j]);
+            o->proj_v[j].position.x = v2.x * r->scaled_fov + centerx;
+            o->proj_v[j].position.y = r->height - (v2.y * r->scaled_fov + centery);
 
             //printf("%f %f\n", o->proj_v[j].position.x, o->proj_v[j].position.y);
         }
@@ -134,6 +136,13 @@ void sortFaces(object_t* obj) {
     qsort(obj->vf_sortable, obj->vf_count, sizeof(sortable_triangle), compFaces);
 }
 
+bool is_in_front_of_camera(object_t* o, surface_t* s) {
+    for(int32_t i = 0; i < 3; i++) {
+        if(o->vertices_in_scene[s->vertex[i]].z > 0) return true;
+    }
+    return false;
+}
+
 void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_t* t = r->objects + i;
@@ -150,16 +159,16 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
 		    * (t->proj_v[currentSurf->vertex[1]].position.x - t->proj_v[currentSurf->vertex[0]].position.x)); //v1->v2's X coord
 		
 		
-	        if(zComp < 0) //If Z component of the normal vector is <0, that means the face is pointing towards us
+	        if(zComp < 0 && is_in_front_of_camera(t, currentSurf)) //If Z component of the normal vector is <0, that means the face is pointing towards us
 	        {
                 t->vf_sortable[t->vf_count].p1 = currentSurf->vertex[0];
                 t->vf_sortable[t->vf_count].p2 = currentSurf->vertex[1];
                 t->vf_sortable[t->vf_count].p3 = currentSurf->vertex[2];
                 vec_3_t* v = t->vertices_in_scene;
                 //Get the distance of each 3D vertex (not projected) of the triangle, and compare
-                float_t dist1 = vec_euclidean_len(v[currentSurf->vertex[0]]);
-                float_t dist2 = vec_euclidean_len(v[currentSurf->vertex[1]]);
-                float_t dist3 = vec_euclidean_len(v[currentSurf->vertex[2]]);
+                float_t dist1 = leud(v[currentSurf->vertex[0]], vec_3_identity());
+                float_t dist2 = leud(v[currentSurf->vertex[1]], vec_3_identity());
+                float_t dist3 = leud(v[currentSurf->vertex[2]], vec_3_identity());
                 float_t max = fmaxf(dist1, dist2);
                 max = fmaxf(max, dist3);
                 t->vf_sortable[t->vf_count].farthest = max;
@@ -191,10 +200,40 @@ int renderScene(render_t* r) {
             t->proj_v, t->asset->v_count, t->visible_faces, t->vf_count * 3);
         //if(ret < 0) info_and_abort(SDL_GetError());
     }
-    SDL_RenderPresent(r->r);
 
     return 0;
 }
+
+int fadenkreuz(render_t* r) { // does not work
+    vec_3_t o = {0, 0, 10}; 
+    vec_3_t v1 = {1, 0, 0};
+    vec_3_t v2 = {0, 1, 0};
+    vec_3_t v3 = {0, 0, 1};
+    vec_2_t v;
+    v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v1)));
+    SDL_SetRenderDrawColor(r->r, 255, 0, 0, 255);
+    SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
+        v.x  * r->scaled_fov + r->width / 2, 
+        r->height - (v.y  * r->scaled_fov + r->height / 2)
+    );
+    
+    v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v2)));
+    SDL_SetRenderDrawColor(r->r, 0, 255, 0, 255);    
+    SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
+        v.x  * r->scaled_fov + r->width / 2, 
+        r->height - (v.y  * r->scaled_fov + r->height / 2)
+    );
+    
+v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
+    SDL_SetRenderDrawColor(r->r, 0, 0, 255, 255);
+    SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
+        v.x  * r->scaled_fov + r->width / 2, 
+        r->height - (v.y  * r->scaled_fov + r->height / 2)
+    );
+   
+    return 0; 
+}
+
 
 int projectObjects(render_t* r) {
     render_position(r);
@@ -202,6 +241,9 @@ int projectObjects(render_t* r) {
     determineVisible(r);
     applyColor(r);
     int r1 = renderScene(r);
-    
+
+    fadenkreuz(r);
+
+    SDL_RenderPresent(r->r);
     return r1;
 }

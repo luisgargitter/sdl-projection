@@ -8,6 +8,7 @@
 // explicitly linked libraries
 #include <math.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h> // for text
 
 // files in project
 #include "linag.h"
@@ -24,10 +25,67 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+#ifdef TTF_DEBUG
+#define TTF_DEBUG_FONTTYPE "Sans"
+#define TTF_DEBUG_FONTSIZE 24 // in pt
+
+#define TTF_DEBUG_RENDER_METHOD TextRenderShaded
+#define TTF_DEBUG_RENDER_STYLE TTF_STYLE_NORMAL
+#define TTF_DEBUG_OUTLINE 0
+#define TTF_DEBUG_HINTING TTF_HINTING_NORMAL
+#define TTF_DEBUG_KERNING 1
+SDL_Color* ttf_debug_foreground = {255, 255, 255, 255};
+SDL_Color* ttf_debug_background = {255, 255, 255, 255};
+#endif
+
 #ifdef CTEST
 int test_main();
 #endif
 
+SDL_Window* sdl_window_setup() {
+    // Initialization
+    if(SDL_Init(SDL_INIT_VIDEO ) < 0) info_and_abort(SDL_GetError());
+    
+    SDL_Window* win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+    if(win == NULL) info_and_abort(SDL_GetError());
+
+    return win;
+}
+
+#ifdef TTF_DEBUG
+TTF_Font* sdl_ttf_setup_debug() {
+    if(TTF_Init() < 0) info_and_abort(SDL_GetError());
+    TTF_Font* font = TTF_OpenFont(TTF_DEBUG_FONTTYPE, TTF_DEBUG_FONTSIZE);
+
+    TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
+    TTF_SetFontOutline(font, 0);
+    TTF_SetFontKerning(font, 1);
+    TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
+
+    return font;
+}
+#endif
+
+render_t* sdl_render_setup(SDL_Window* win) {
+    render_t* r = malloc(sizeof(*r));
+    if(r == NULL) info_and_abort(NULL);
+    
+    // Create new renderer with FOV of 90 degrees (1,5708 rad)
+    if(render_init(r, win, M_PI / 2) < 0) info_and_abort(NULL);
+
+    return r;
+}
+
+event_handler_t* sdl_event_handler_setup(SDL_Window* win, render_t* r) {
+    event_handler_t* eh = malloc(sizeof(*eh));
+    if(eh == NULL) info_and_abort(NULL);
+    if(event_handler_init(eh, win, r) < 0) info_and_abort(NULL);
+
+    return eh;
+}
 
 int main(int argc, char **argv) {
     #ifdef CTEST
@@ -36,24 +94,12 @@ int main(int argc, char **argv) {
     return 0;
     #endif
     
-    // Initialization
-    if(SDL_Init(SDL_INIT_VIDEO ) < 0) info_and_abort(SDL_GetError());
-
-    SDL_Window *win = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 
-        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    if(win == NULL) info_and_abort(SDL_GetError());
-
-    render_t* r = malloc(sizeof(*r));
-    if(r == NULL) info_and_abort(NULL);
-    
-    // Create new renderer with FOV of 90 degrees (1,5708 rad)
-    if(render_init(r, win, M_PI / 2) < 0) info_and_abort(NULL);
-
-    // TODO: fully reintegrate eventhandler to enable movement
-    event_handler_t* eh = malloc(sizeof(*eh));
-    if(eh == NULL) info_and_abort(NULL);
-    event_handler_init(eh, win, r);
+    SDL_Window* win = sdl_window_setup();
+    render_t* r = sdl_render_setup(win);
+    #ifdef TTF_DEBUG
+        TTF_Font* font = sdl_ttf_setup_debug();
+    #endif
+    event_handler_t* eh = sdl_event_handler_setup(win, r);
 
     FILE* f = fopen("test_assets/teapot.obj", "rb");
     if(f == NULL) info_and_abort(strerror(errno));
@@ -64,7 +110,7 @@ int main(int argc, char **argv) {
     if(asset_load_obj(f, a) < 0) info_and_abort("ASSETLOADERR");
     fclose(f);
 
-    matrix_3x3_t m = matrix_3x3_rotation(0, 0, 0);
+    matrix_3x3_t m = matrix_3x3_rotation(vec_3(0, 0, 0));
     vec_3_t v = {0, 0, 0};
     
     render_add_object(r, a, m, v);
