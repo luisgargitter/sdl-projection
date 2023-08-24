@@ -41,20 +41,6 @@ SDL_Window* sdl_window_setup() {
     return win;
 }
 
-#ifdef TTF_DEBUG
-TTF_Font* sdl_ttf_setup_debug() {
-    if(TTF_Init() < 0) info_and_abort(SDL_GetError());
-    TTF_Font* font = TTF_OpenFont(TTF_DEBUG_FONTTYPE, TTF_DEBUG_FONTSIZE);
-
-    TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
-    TTF_SetFontOutline(font, 0);
-    TTF_SetFontKerning(font, 1);
-    TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
-
-    return font;
-}
-#endif
-
 render_t* sdl_render_setup(SDL_Window* win) {
     render_t* r = malloc(sizeof(*r));
     if(r == NULL) info_and_abort(NULL);
@@ -100,6 +86,7 @@ int main(int argc, char **argv) {
     vec_3_t v = {0, 0, 0};
     
     render_add_object(r, a, m, v);
+    render_add_object(r, a, matrix_3x3_rotation(vec_3(0, M_PI/2, M_PI/4)), vec_3(10, 0, 10));    
 
     while(eh->quit_app == false) digest_events(eh);
 
