@@ -8,7 +8,6 @@
 // explicitly linked libraries
 #include <math.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h> // for text
 
 // files in project
 #include "linag.h"
@@ -24,19 +23,6 @@
 #define TITLE "SDL-Projection"
 #define WIDTH 800
 #define HEIGHT 600
-
-#ifdef TTF_DEBUG
-#define TTF_DEBUG_FONTTYPE "Sans"
-#define TTF_DEBUG_FONTSIZE 24 // in pt
-
-#define TTF_DEBUG_RENDER_METHOD TextRenderShaded
-#define TTF_DEBUG_RENDER_STYLE TTF_STYLE_NORMAL
-#define TTF_DEBUG_OUTLINE 0
-#define TTF_DEBUG_HINTING TTF_HINTING_NORMAL
-#define TTF_DEBUG_KERNING 1
-SDL_Color* ttf_debug_foreground = {255, 255, 255, 255};
-SDL_Color* ttf_debug_background = {255, 255, 255, 255};
-#endif
 
 #ifdef CTEST
 int test_main();
