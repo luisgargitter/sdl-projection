@@ -1,0 +1,10 @@
+
+*.o
+
+sdl2/main
+docs/html
+
+main
+test
+
+.vscode
