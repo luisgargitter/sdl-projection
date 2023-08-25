@@ -148,7 +148,7 @@ int asset_load_obj(FILE* f, asset_t* a) {
 
 void asset_free(asset_t* a) {
     a->v_count = 0;
-    free(a->f_vector);
+    free(a->v_vector);
     free(a->n_vector);
     free(a->t_vector);
     a->f_count = 0;

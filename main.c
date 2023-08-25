@@ -74,7 +74,11 @@ int main(int argc, char **argv) {
     #endif
     event_handler_t* eh = sdl_event_handler_setup(win, r);
 
-    FILE* f = fopen("test_assets/sponza.obj", "rb");
+    FILE *f;
+    if (argc < 2)
+      f = fopen("test_assets/teapot.obj", "rb");
+    else
+      f = fopen(argv[1], "rb");
     if(f == NULL) info_and_abort(strerror(errno));
 
     asset_t* a = malloc(sizeof(*a));

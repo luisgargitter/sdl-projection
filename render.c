@@ -136,9 +136,9 @@ void sortFaces(object_t* obj) {
 bool is_in_front_of_camera(object_t* o, surface_t* s) {
     for(int32_t i = 0; i < 3; i++) {
         vec_3_t* v =  o->vertices_in_scene + s->vertex[i];
-        if(v->z < 0) return false;
+        if(v->z > 0) return true;
     }
-    return true;
+    return false;
 }
 
 void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
