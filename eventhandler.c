@@ -57,6 +57,7 @@ int32_t digest_events(event_handler_t* e) {
     bool ks = false;
     bool kd = false;
     SDL_Keycode kc;
+    float mov_step = 0.1;
 
     // smooths out time between frames
     if(time_since_last_frame > POLL_EVENT_TIMEOUT_MS) time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
@@ -78,18 +79,19 @@ int32_t digest_events(event_handler_t* e) {
                 break;
 
             case SDL_MOUSEMOTION:
-                if(s.motion.state == SDL_BUTTON_LMASK) {
-                    e->y_angle += (float) s.motion.xrel / 100.0;
-                    e->x_angle += (float) s.motion.yrel / 100.0;
+                //if(s.motion.state == SDL_BUTTON_LMASK) {
+                    e->y_angle += ((float) s.motion.xrel) / 500.0;
+                    e->x_angle += ((float) s.motion.yrel) / 500.0;
 
                     // limiting vertical movement
                     e->x_angle = (e->x_angle < -M_PI / 2) ?  -M_PI / 2 : e->x_angle;
                     e->x_angle = (e->x_angle > M_PI / 2) ? M_PI / 2 : e->x_angle;
-                }
+                //}
                 break;
 
             case SDL_MOUSEWHEEL:              
-                // v.z += s.wheel.preciseY;
+                // mov_step *= s.wheel.preciseY > 0 ? 1.1 : 1;
+                // mov_step *= s.wheel.preciseY < 0 ? 0.9 : 1;
                 break;
 
             // movement
@@ -98,7 +100,9 @@ int32_t digest_events(event_handler_t* e) {
                 if(kc == SDLK_w) kw = true;
                 else if(kc == SDLK_a) ka = true;
                 else if(kc == SDLK_s) ks = true;
-                else if(kc == SDLK_d) kd = true; 
+                else if(kc == SDLK_d) kd = true;
+                // quit
+                else if(kc == SDLK_q) e->quit_app = 1; 
                 break;
 
             case SDL_KEYUP:
@@ -107,7 +111,8 @@ int32_t digest_events(event_handler_t* e) {
                 else if(kc == SDLK_a) ka = false;
                 else if(kc == SDLK_s) ks = false;
                 else if(kc == SDLK_d) kd = false; 
-                
+                // quit 
+                else if(kc == SDLK_q) e->quit_app = 1; 
                 break;
 
             default:
@@ -115,11 +120,11 @@ int32_t digest_events(event_handler_t* e) {
         }
     } while(SDL_PollEvent(&s) > 0);
 
-    v.z -= kw == true ? 1: 0;
-    v.z += ks == true ? 1 : 0;
+    v.z -= kw == true ? mov_step : 0;
+    v.z += ks == true ? mov_step : 0;
 
-    v.x += ka == true ? 1 : 0;
-    v.x -= kd == true ? 1 : 0;
+    v.x += ka == true ? mov_step : 0;
+    v.x -= kd == true ? mov_step : 0;
 
 
     e->render->orientation = lmul(

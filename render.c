@@ -17,9 +17,6 @@
 
 #define DEFAULT_CAPACITY_OBJECTS 32
 
-// temporary
-#define SDL_TERM_DEBUG
-
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
     if(r->r == NULL) info_and_abort(SDL_GetError());
@@ -138,9 +135,10 @@ void sortFaces(object_t* obj) {
 
 bool is_in_front_of_camera(object_t* o, surface_t* s) {
     for(int32_t i = 0; i < 3; i++) {
-        if(o->vertices_in_scene[s->vertex[i]].z > 0) return true;
+        vec_3_t* v =  o->vertices_in_scene + s->vertex[i];
+        if(v->z < 0) return false;
     }
-    return false;
+    return true;
 }
 
 void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)

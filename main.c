@@ -42,6 +42,7 @@ SDL_Window* sdl_window_setup() {
 }
 
 render_t* sdl_render_setup(SDL_Window* win) {
+    SDL_SetRelativeMouseMode(SDL_TRUE);
     render_t* r = malloc(sizeof(*r));
     if(r == NULL) info_and_abort(NULL);
     
@@ -73,7 +74,7 @@ int main(int argc, char **argv) {
     #endif
     event_handler_t* eh = sdl_event_handler_setup(win, r);
 
-    FILE* f = fopen("test_assets/teapot.obj", "rb");
+    FILE* f = fopen("test_assets/sponza.obj", "rb");
     if(f == NULL) info_and_abort(strerror(errno));
 
     asset_t* a = malloc(sizeof(*a));
@@ -85,8 +86,9 @@ int main(int argc, char **argv) {
     matrix_3x3_t m = matrix_3x3_rotation(vec_3(0, 0, 0));
     vec_3_t v = {0, 0, 0};
     
+    
     render_add_object(r, a, m, v);
-    render_add_object(r, a, matrix_3x3_rotation(vec_3(0, M_PI/2, M_PI/4)), vec_3(10, 0, 10));    
+    //render_add_object(r, a, matrix_3x3_rotation(vec_3(0, M_PI/2, M_PI/4)), vec_3(10, 0, 10));    
 
     while(eh->quit_app == false) digest_events(eh);
 
