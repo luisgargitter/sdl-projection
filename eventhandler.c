@@ -51,10 +51,17 @@ int32_t digest_events(event_handler_t* e) {
     SDL_Event s;
     static int64_t time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
 
-    vec_3_t v = {0, 0, 0};
+    vec_3_t v = vec_3(0, 0, 0);
+    bool kw = false;
+    bool ka = false;
+    bool ks = false;
+    bool kd = false;
+    SDL_Keycode kc;
 
+    // smooths out time between frames
     if(time_since_last_frame > POLL_EVENT_TIMEOUT_MS) time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
     SDL_WaitEventTimeout(&s, POLL_EVENT_TIMEOUT_MS - time_since_last_frame);
+
     // adds up all movement that happened, and renders final result
     do {
         switch (s.type)
@@ -69,24 +76,51 @@ int32_t digest_events(event_handler_t* e) {
                 SDL_GetWindowSize(e->window, &e->render->width, &e->render->height);
                 e->render->scaled_fov = fminf(e->render->width, e->render->height) * e->render->fov_ratio;
                 break;
-        
+
             case SDL_MOUSEMOTION:
                 if(s.motion.state == SDL_BUTTON_LMASK) {
                     e->y_angle += (float) s.motion.xrel / 100.0;
                     e->x_angle += (float) s.motion.yrel / 100.0;
-                    if(e->x_angle < -M_PI / 2) e->x_angle = -M_PI / 2;
-                    if(e->x_angle > M_PI / 2) e->x_angle = M_PI / 2;
+
+                    // limiting vertical movement
+                    e->x_angle = (e->x_angle < -M_PI / 2) ?  -M_PI / 2 : e->x_angle;
+                    e->x_angle = (e->x_angle > M_PI / 2) ? M_PI / 2 : e->x_angle;
                 }
                 break;
 
             case SDL_MOUSEWHEEL:              
-                v.z += s.wheel.preciseY;
+                // v.z += s.wheel.preciseY;
+                break;
+
+            // movement
+            case SDL_KEYDOWN:
+                kc = s.key.keysym.sym;
+                if(kc == SDLK_w) kw = true;
+                else if(kc == SDLK_a) ka = true;
+                else if(kc == SDLK_s) ks = true;
+                else if(kc == SDLK_d) kd = true; 
+                break;
+
+            case SDL_KEYUP:
+                kc = s.key.keysym.sym;
+                if(kc == SDLK_w) kw = false;
+                else if(kc == SDLK_a) ka = false;
+                else if(kc == SDLK_s) ks = false;
+                else if(kc == SDLK_d) kd = false; 
+                
                 break;
 
             default:
                 break;
         }
     } while(SDL_PollEvent(&s) > 0);
+
+    v.z -= kw == true ? 1: 0;
+    v.z += ks == true ? 1 : 0;
+
+    v.x += ka == true ? 1 : 0;
+    v.x -= kd == true ? 1 : 0;
+
 
     e->render->orientation = lmul(
         matrix_3x3_rotation(vec_3(e->x_angle, 0, 0)), 
