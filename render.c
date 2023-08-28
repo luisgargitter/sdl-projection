@@ -1,6 +1,7 @@
 #include "render.h"
 
 // libraries in prelude
+#include <SDL2/SDL_stdinc.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -102,20 +103,22 @@ void projectCentral(render_t* r) {
 void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
     // execute once
     static int i = 0;
-    if(i == 1) return;
+    //if(i == 1) return;
     i = 1;
 
     uint8_t colors[3] = {0, 127, 255};
     srand((unsigned int) time(NULL));
-
-    for(int32_t j = 0; j < r->num_objects; j++) {
-        object_t* o = r->objects + j;
-        for(int32_t k = 0; k < o->asset->v_count; k++) {
-            o->proj_v[k].color.r = colors[rand()%3];
-            o->proj_v[k].color.g = colors[rand()%3];
-            o->proj_v[k].color.b = colors[rand()%3];
-            o->proj_v[k].color.a = 255;
-        }
+    
+    for (int32_t j = 0; j < r->num_objects; j++) {
+      object_t *o = r->objects + j;
+      vec_3_t* v = o->vertices_in_scene;
+      for (int32_t k = 0; k < o->asset->v_count; k++) {
+        float lightVal = (10.0 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]),2));
+        o->proj_v[k].color.r = (255 < lightVal) ? 255 : lightVal;
+        o->proj_v[k].color.g = (255 < lightVal) ? 255 : lightVal;
+        o->proj_v[k].color.b = (255 < lightVal) ? 255 : lightVal;
+        o->proj_v[k].color.a = 255;
+      }
     }
 }
 
@@ -129,7 +132,7 @@ int compFaces(const void* f1, const void* f2) {
     return -1;
 }
 
-void sortFaces(object_t* obj) {
+void sortFaces(object_t *obj) {
     qsort(obj->vf_sortable, obj->vf_count, sizeof(sortable_triangle), compFaces);
 }
 
