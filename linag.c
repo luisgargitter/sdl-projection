@@ -1,5 +1,6 @@
 #include "linag.h"
 
+#include <float.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -107,12 +108,12 @@ vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2) {
 }
 
 vec_2_t vec_3_map_to_plane(vec_3_t v) {
-    if (v.z > 0.00001)
+    if (v.z > 0.0)
     {
         vec_2_t v2 = {v.x / v.z, v.y / v.z};
         return v2;
     }
-    vec_2_t v2 = {v.x / 0.00001, v.y / 0.00001};
+    vec_2_t v2 = {v.x / 0.000001, v.y / 0.000001};
     return v2;
 }
 
