@@ -1,5 +1,8 @@
 #include "eventhandler.h"
 
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_stdinc.h>
+#include <SDL2/SDL_video.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
@@ -39,9 +42,11 @@ int print_debug(event_handler_t* e) {
     if(i % 16 == 0) {
         printf("\033c"); // clear screen
         printf("Offset: x: %6f, y: %6f, z: %6f\n", e->render->offset.x, e->render->offset.y, e->render->offset.z);
-        printf("Orientation: x-axis: %6f°, y-axis: %6f°\n", (e->x_angle / M_PI) * 180, (e->y_angle / M_PI) * 180); 
+        printf("Orientation: x-axis: %6f°, y-axis: %6f°\n", (e->x_angle / M_PI) * 180, (e->y_angle / M_PI) * 180);
+        long deltaT = millis() - e->time_of_last_frame;
+        printf("Delta-time since last frame (ms): %ld | ~%1f FPS\n", deltaT, 1.0/(deltaT * 0.001)); 
     }
-    i = (i + 1) % 10;
+    i = (i + 2) % 10;
 
     return 0;
 }
@@ -102,7 +107,13 @@ int32_t digest_events(event_handler_t* e) {
                 else if(kc == SDLK_s) ks = true;
                 else if(kc == SDLK_d) kd = true;
                 // quit
-                else if(kc == SDLK_q) e->quit_app = 1; 
+                else if(kc == SDLK_q) e->quit_app = 1;
+                else if(kc == SDLK_g)
+                {
+                    if(SDL_GetRelativeMouseMode()) //If mouse grabbed
+                        SDL_SetRelativeMouseMode(SDL_FALSE);
+                    else SDL_SetRelativeMouseMode(SDL_TRUE);
+                }
                 break;
 
             case SDL_KEYUP:
@@ -112,7 +123,7 @@ int32_t digest_events(event_handler_t* e) {
                 else if(kc == SDLK_s) ks = false;
                 else if(kc == SDLK_d) kd = false; 
                 // quit 
-                else if(kc == SDLK_q) e->quit_app = 1; 
+                else if(kc == SDLK_q) e->quit_app = 1;
                 break;
 
             default:

@@ -27,6 +27,13 @@ int object_init(object_t* o, asset_t* a, matrix_3x3_t orientation, vec_3_t offse
     o->visible_faces = malloc(sizeof(*o->visible_faces) * o->asset->f_count * 3);
     o->vf_sortable = malloc(sizeof(sortable_triangle) * o->asset->f_count);
 
+    for (int i = 0; i < o->asset->f_count; i++)
+    {
+      o->vf_sortable[i].p1 = o->asset->f_vector[i].vertex[0];
+      o->vf_sortable[i].p2 = o->asset->f_vector[i].vertex[1];
+      o->vf_sortable[i].p3 = o->asset->f_vector[i].vertex[2];
+    }
+
     return 0;
 }
 
