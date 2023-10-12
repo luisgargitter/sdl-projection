@@ -17,12 +17,6 @@ matrix_3x3_t matrix_3x3_identity() {
     return r;
 }
 
-matrix_3x3_t matrix_3x3_transpose(matrix_3x3_t matrix) {
-    // TODO: transpose matrix
-
-    return matrix;
-}
-
 matrix_3x3_t matrix_3x3_rotation(vec_3_t v) {
     float x = v.x;
     float y = v.y;
@@ -82,6 +76,7 @@ vec_3_t vec_3(float x, float y, float z) {
     return v;
 }
 
+// unnecessary, try to get rid of usage, use vec_3(0, 0, 0) instead
 vec_3_t vec_3_identity() {
     vec_3_t v = {0, 0, 0};
     return v;
@@ -107,12 +102,33 @@ vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2) {
     return r;
 }
 
+vec_3_t vec_3_scale(vec_3_t v, float s) {
+	return vec_3(v.x * s, v.y * s, v.z * s);
+}
+
+/** @brief returns the linear-interpolated Point between v1 and v2 that is part t away from v1.
+ * @param v1 Point 1.
+ * @param v2 Point 2.
+ * @param z value between 0 and 1.
+ * @return Point between v1 and v2.
+ */
+vec_3_t vec_3_lerp(vec_3_t v1, vec_3_t v2, float t) {
+	return vec_3_add(v1, vec_3_scale(vec_3_subtract(v2, v1), t));
+}
+
+float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2) {
+    vec_3_t v = lsub(v1, v2);
+    float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
+    return sqrtf(len);
+}
+
 vec_2_t vec_3_map_to_plane(vec_3_t v) {
     if (v.z > 0.0)
     {
         vec_2_t v2 = {v.x / v.z, v.y / v.z};
         return v2;
     }
+	// ----- pfusch!!! -----
     vec_2_t v2 = {v.x / 0.000001, v.y / 0.000001};
     return v2;
 }
@@ -132,10 +148,3 @@ int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res
 
     return 0;
 }
-
-float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2) {
-    vec_3_t v = lsub(v1, v2);
-    float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
-    return sqrtf(len);
-}
-

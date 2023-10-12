@@ -143,7 +143,7 @@ int32_t digest_events(event_handler_t* e) {
         matrix_3x3_rotation(vec_3(0, e->y_angle, 0))
     );
     
-    // past movement needs to be rotated opposed to rest (order of multiplication, must also be reversed)
+    // past movement needs to be rotated opposed to rest (order of multiplication must also be reversed)
     matrix_3x3_t ro =  lmul(
         matrix_3x3_rotation(vec_3(0, -e->y_angle, 0)), 
         matrix_3x3_rotation(vec_3(-e->x_angle, 0, 0))

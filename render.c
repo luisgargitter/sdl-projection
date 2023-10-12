@@ -103,9 +103,11 @@ void projectCentral(render_t* r) {
 
 void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
     // execute once
-    static int i = 0;
+    /*
+	static int i = 0;
     if(i == 1) return;
     i = 1;
+	*/
 
     uint8_t colors[3] = {0, 127, 255};
     srand((unsigned int) time(NULL));
@@ -114,7 +116,7 @@ void applyColor(render_t* r) { // temp function for testing. will be replaced by
       object_t *o = r->objects + j;
       vec_3_t* v = o->vertices_in_scene;
       for (int32_t k = 0; k < o->asset->v_count; k++) {
-        float lightVal = 50 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]),1);
+        float lightVal = 50 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]), 1);
         o->proj_v[k].color.r = (255 < lightVal) ? 255 : lightVal;
         o->proj_v[k].color.g = (255 < lightVal) ? 255 : lightVal;
         o->proj_v[k].color.b = (255 < lightVal) ? 255 : lightVal;
