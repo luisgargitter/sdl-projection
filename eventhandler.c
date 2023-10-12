@@ -44,7 +44,7 @@ int print_debug(event_handler_t* e) {
         printf("Offset: x: %6f, y: %6f, z: %6f\n", e->render->offset.x, e->render->offset.y, e->render->offset.z);
         printf("Orientation: x-axis: %6f°, y-axis: %6f°\n", (e->x_angle / M_PI) * 180, (e->y_angle / M_PI) * 180);
         long deltaT = millis() - e->time_of_last_frame;
-        printf("Delta-time since last frame (ms): %ld | ~%1f FPS\n", deltaT, 1.0/(deltaT * 0.001)); 
+        printf("Delta-time since last frame (ms): %ld | ~%.0f FPS\n", deltaT, 1000.0/deltaT); 
     }
     i = (i + 2) % 10;
 
@@ -64,11 +64,17 @@ int32_t digest_events(event_handler_t* e) {
     SDL_Keycode kc;
     float mov_step = 0.0125;
 
-    // smooths out time between frames
+    time_since_last_frame = millis() - e->time_of_last_frame;
+    
+	// smooths out time between frames
     if(time_since_last_frame > POLL_EVENT_TIMEOUT_MS) time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
     SDL_WaitEventTimeout(&s, POLL_EVENT_TIMEOUT_MS - time_since_last_frame);
+	
+	print_debug(e);
+	
+	e->time_of_last_frame = millis();    
 
-    // adds up all movement that happened, and renders final result
+	// adds up all movement that happened, and renders final result
     do {
         switch (s.type)
         {
@@ -152,14 +158,8 @@ int32_t digest_events(event_handler_t* e) {
     e->render->offset = ladd(e->render->offset, 
         matrix_3x3_apply(ro, v)
     );
-
-    int64_t t = millis();
-    time_since_last_frame = t - e->time_of_last_frame;
-    e->time_of_last_frame = t;
-
     
     retCode = projectObjects(e->render);
-    print_debug(e);
 
     return retCode;
 }
