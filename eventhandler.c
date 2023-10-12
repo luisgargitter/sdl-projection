@@ -57,12 +57,12 @@ int32_t digest_events(event_handler_t* e) {
     static int64_t time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
 
     vec_3_t v = vec_3(0, 0, 0);
-    bool kw = false;
-    bool ka = false;
-    bool ks = false;
-    bool kd = false;
+    static bool kw = false;
+    static bool ka = false;
+    static bool ks = false;
+    static bool kd = false;
     SDL_Keycode kc;
-    float mov_step = 0.1;
+    float mov_step = 0.0125;
 
     // smooths out time between frames
     if(time_since_last_frame > POLL_EVENT_TIMEOUT_MS) time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
@@ -85,8 +85,8 @@ int32_t digest_events(event_handler_t* e) {
 
             case SDL_MOUSEMOTION:
                 //if(s.motion.state == SDL_BUTTON_LMASK) {
-                    e->y_angle += ((float) s.motion.xrel) / 500.0;
-                    e->x_angle += ((float) s.motion.yrel) / 500.0;
+                    e->y_angle -= ((float) s.motion.xrel) / 500.0;
+                    e->x_angle -= ((float) s.motion.yrel) / 500.0;
 
                     // limiting vertical movement
                     e->x_angle = (e->x_angle < -M_PI / 2) ?  -M_PI / 2 : e->x_angle;
@@ -116,7 +116,7 @@ int32_t digest_events(event_handler_t* e) {
                 }
                 break;
 
-            case SDL_KEYUP:
+            case SDL_KEYUP:		
                 kc = s.key.keysym.sym;
                 if(kc == SDLK_w) kw = false;
                 else if(kc == SDLK_a) ka = false;

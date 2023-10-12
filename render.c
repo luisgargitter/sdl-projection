@@ -114,13 +114,13 @@ void applyColor(render_t* r) { // temp function for testing. will be replaced by
       object_t *o = r->objects + j;
       vec_3_t* v = o->vertices_in_scene;
       for (int32_t k = 0; k < o->asset->v_count; k++) {
-        float lightVal = (10.0 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]),2));
+        float lightVal = 50 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]),1);
         o->proj_v[k].color.r = (255 < lightVal) ? 255 : lightVal;
         o->proj_v[k].color.g = (255 < lightVal) ? 255 : lightVal;
         o->proj_v[k].color.b = (255 < lightVal) ? 255 : lightVal;
-        o->proj_v[k].color.r = rand();
-        o->proj_v[k].color.g = rand();
-        o->proj_v[k].color.b = rand();
+        //o->proj_v[k].color.r = rand();
+        //o->proj_v[k].color.g = rand();
+        //o->proj_v[k].color.b = rand();
         o->proj_v[k].color.a = 255;
       }
     }
