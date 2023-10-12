@@ -1,6 +1,7 @@
 
 *.o
 *.swp
+*.old
 
 sdl2/main
 docs/html
@@ -9,3 +10,4 @@ main
 test
 
 .vscode
+
