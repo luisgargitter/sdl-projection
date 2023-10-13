@@ -2,6 +2,7 @@
 
 // libraries in prelude
 #include <SDL2/SDL_stdinc.h>
+#include <bits/time.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -18,6 +19,9 @@
 #include "timsort.h"
 
 #define DEFAULT_CAPACITY_OBJECTS 32
+
+struct timer global_timer;
+struct timespec myspec;
 
 int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->r = SDL_CreateRenderer(w, -1, SDL_RENDERER_ACCELERATED);
@@ -158,17 +162,25 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
         object_t* t = r->objects + i;
         t->vf_count = 0;
 
+        vec_3_t *v = t->vertices_in_scene;
         for(int32_t f = 0; f < t->asset->f_count; f++){
             sortable_triangle* st = &(t->vf_sortable[f]);
-            vec_3_t *v = t->vertices_in_scene;
-            float_t dist1 = leud(v[st->p1], vec_3_identity());
-            float_t dist2 = leud(v[st->p2], vec_3_identity());
-            float_t dist3 = leud(v[st->p3], vec_3_identity());
+            float_t dist1 = v[st->p1].z;
+            float_t dist2 = v[st->p2].z;
+            float_t dist3 = v[st->p3].z;
             float_t max = fmaxf(dist1, dist2);
             max = fmaxf(max, dist3);
             st->farthest = max;
         }
+        #ifdef CLOCKING
+            clock_gettime(CLOCK_MONOTONIC, &myspec);
+            global_timer.timestamp_vis_distance_calc = myspec.tv_nsec;
+        #endif
         sortFaces(t);
+        #ifdef CLOCKING
+            clock_gettime(CLOCK_MONOTONIC, &myspec);
+            global_timer.timestamp_vis_sorting = myspec.tv_nsec;
+        #endif
         for(int32_t f = 0; f < t->asset->f_count; f++){
             surface_t* currentSurf = t->asset->f_vector + f;
             sortable_triangle st = t->vf_sortable[f];
@@ -189,6 +201,8 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
                 t->vf_count++;
 	        }
         }
+        clock_gettime(CLOCK_MONOTONIC, &myspec);
+        global_timer.timestamp_vis_determine = myspec.tv_nsec;
     }
 }
 
@@ -243,8 +257,20 @@ v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
 
 int projectObjects(render_t* r) {
     render_position(r);
+    #ifdef CLOCKING
+        clock_gettime(CLOCK_MONOTONIC, &myspec);
+        global_timer.timestamp_reposition = myspec.tv_nsec;
+    #endif
     projectCentral(r);
+    #ifdef CLOCKING
+        clock_gettime(CLOCK_MONOTONIC, &myspec);
+        global_timer.timestamp_project = myspec.tv_nsec;
+    #endif
     determineVisible(r);
+    #ifdef CLOCKING
+        clock_gettime(CLOCK_MONOTONIC, &myspec);
+        global_timer.timestamp_vis_overall = myspec.tv_nsec;
+    #endif
     applyColor(r);
     int r1 = renderScene(r);
 

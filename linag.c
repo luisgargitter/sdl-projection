@@ -118,7 +118,7 @@ vec_3_t vec_3_lerp(vec_3_t v1, vec_3_t v2, float t) {
 
 float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2) {
     vec_3_t v = lsub(v1, v2);
-    float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
+    float len = (v.x * v.x) + (v.y * v.y) + (v.z * v.z);
     return sqrtf(len);
 }
 

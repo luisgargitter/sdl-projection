@@ -6,9 +6,12 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <bits/types/clockid_t.h>
+#include <bits/types/struct_timespec.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 
 #include <SDL2/SDL.h>
 
@@ -26,6 +29,18 @@ typedef struct {
     matrix_3x3_t orientation;   ///< Global delta orientation (camera angle)
     vec_3_t offset;             ///< Global delta offset (camera position)
 } render_t;
+
+//Used to store the timestamps of various events
+struct timer
+{
+    long timestamp_begin;
+    long timestamp_reposition;
+    long timestamp_project;
+    long timestamp_vis_overall;
+    long timestamp_vis_distance_calc;
+    long timestamp_vis_sorting;
+    long timestamp_vis_determine;
+};
 
 int render_init(render_t* render, SDL_Window* window, float_t fov_ratio);
 

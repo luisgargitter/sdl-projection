@@ -28,6 +28,7 @@
 int test_main();
 #endif
 
+
 SDL_Window* sdl_window_setup() {
     // Initialization
     if(SDL_Init(SDL_INIT_VIDEO ) < 0) info_and_abort(SDL_GetError());

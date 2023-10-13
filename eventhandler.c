@@ -3,6 +3,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_video.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
@@ -14,6 +15,8 @@
 
 #define POLL_EVENT_TIMEOUT_MS   16 // 16 ms for 60 fps
 
+extern struct timer global_timer;
+extern struct timespec myspec;
 
 int32_t event_handler_init(event_handler_t* e, SDL_Window* w, render_t* r) {
     e->window = w;
@@ -44,7 +47,15 @@ int print_debug(event_handler_t* e) {
         printf("Offset: x: %6f, y: %6f, z: %6f\n", e->render->offset.x, e->render->offset.y, e->render->offset.z);
         printf("Orientation: x-axis: %6f°, y-axis: %6f°\n", (e->x_angle / M_PI) * 180, (e->y_angle / M_PI) * 180);
         long deltaT = millis() - e->time_of_last_frame;
-        printf("Delta-time since last frame (ms): %ld | ~%.0f FPS\n", deltaT, 1000.0/deltaT); 
+        printf("Delta-time since last frame (ms): %ld | ~%.0f FPS\n", deltaT, 1000.0/deltaT);
+        #ifdef CLOCKING
+            printf("%f us to reposition all vertices. \n", (global_timer.timestamp_reposition - global_timer.timestamp_begin)/1000.0);
+            printf("%f us to project all vertices. \n", (global_timer.timestamp_project - global_timer.timestamp_reposition)/1000.0);
+            printf("%f us to recalculate distances. \n", (global_timer.timestamp_vis_distance_calc - global_timer.timestamp_project)/1000.0);
+            printf("%f us to sort all faces. \n", (global_timer.timestamp_vis_sorting - global_timer.timestamp_vis_distance_calc)/1000.0);
+            printf("%f us to determine what to draw and what not. \n", (global_timer.timestamp_vis_determine - global_timer.timestamp_vis_sorting)/1000.0);
+            printf("%f us to do overall face checks. \n", (global_timer.timestamp_vis_overall - global_timer.timestamp_project)/1000.0);
+        #endif
     }
     i = (i + 2) % 10;
 
@@ -158,7 +169,10 @@ int32_t digest_events(event_handler_t* e) {
     e->render->offset = ladd(e->render->offset, 
         matrix_3x3_apply(ro, v)
     );
-    
+    #ifdef CLOCKING
+        clock_gettime(CLOCK_MONOTONIC, &myspec);
+        global_timer.timestamp_begin = myspec.tv_nsec;
+    #endif
     retCode = projectObjects(e->render);
 
     return retCode;
