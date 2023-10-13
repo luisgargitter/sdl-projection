@@ -107,11 +107,11 @@ void projectCentral(render_t* r) {
 
 void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
     // execute once
-    /*
+    
 	static int i = 0;
     if(i == 1) return;
     i = 1;
-	*/
+	
 
     uint8_t colors[3] = {0, 127, 255};
     srand((unsigned int) time(NULL));
