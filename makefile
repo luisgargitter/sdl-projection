@@ -1,50 +1,88 @@
+# Default-Config
+# Libraries
+LIBS = -lm -lSDL2
 
-LIBS = -lm -lSDL2 				# Libraries
-CC = clang						# Compiler
-CFLAGS = -g -Wall -O2	   		# -g for debugging, -Wall for warnings
-TARGET = main					# Name of the executable
+# Compiler
+CC = gcc
 
-TEST_LIBS = -lcunit # Libraries needed for the test
-TEST_TARGET = test
+# Flags for compilations
+# c			... compilation without linking
+CFLAGS = -std=c11 -pedantic -Wall 			\
+-D_DEFAULT_SOURCE -D_BSD_SOURCE				\
+-D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L	\
+-DNDEBUG -D_GNU_SOURCE -c
 
-OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
-HEADERS = $(wildcard *.h)
+# Flags for linking
+LFLAGS = $(LIBS)
 
-%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@
+# Flags for debug compilation
+# UNDEBUG	... undefines NDEBUG (enables asserts)
+# g			... keep debug symbols
+DCFLAGS = -UNDEBUG -g
+DLFLAGS = -g			
+
+# Flags for production compilation
+# O			... sets optimization-level
+PC_FLAGS = -O2
 
 
-all: $(OBJECTS)
+BUILD_PATH = build/
+SRC_PATH = src/
+
+# Name of the executable
+TARGET = main
+
+DOXY_PATH = docs/
+# Name of the doxy configuration
+DOXY_CONF = .doxy.dox
+
+# Format flag for indent
+FORMAT = -linux
+
+
+HEADERS = $(wildcard $(SRC_PATH)*.h)
+SOURCES = $(wildcard $(SRC_PATH)*.c)
+
+OBJECTS = $(patsubst $(SRC_PATH)%.c, $(BUILD_PATH)%.o, $(SOURCES))
+
+$(BUILD_PATH)%.o: $(SRC_PATH)%.c $(HEADERS)
+	$(CC) $(CFLAGS) $< -o $@
+
+all: --all-pre $(OBJECTS)
 	echo "Linking..."
-	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $(TARGET)
+	$(CC) $(LFLAGS) $(OBJECTS) $(LIBS) -o $(BUILD_PATH)$(TARGET)
+	echo "Done."
+
+--all-pre:
+	mkdir -p $(BUILD_PATH)
+
+prod: --prod-pre all
+
+--prod-pre:
+	echo "Adding production flags..."
+	$(eval CFLAGS += $(PC_FLAGS))
+
+debug: --debug-pre all
+
+--debug-pre:
+	echo "Adding debug flags..."
+	$(eval CFLAGS += $(DCFLAGS))
+	$(eval LFLAGS += $(DLFLAGS))
+
+doxy: clean
+	echo "Generating documentation..."
+	doxygen $(DOXY_CONF) $(DOXY_PATH)
+	echo "Done."
 
 .SILENT:
 clean:
 	echo "Cleaning..."
-	-rm -f *.out
-	-rm -f *.o
-	-rm -f $(TARGET)
-	-rm -rf docs/html
-	-rm -f $(TEST_TARGET)
+	-rm -rf $(BUILD_PATH)
+	-rm -rf $(DOXY_PATH)
+	echo "Done."
 
-rebuild: clean all
-
-test: clean --test-pre  --test
-
---test-pre: 
-	echo "Pre Build Test..."
-	# adding following test flags to the CFLAGS
-	$(eval CFLAGS += -DCTEST) 
-
-# private target, cannot be called from outside, please call test
---test: $(OBJECTS)
-	echo "Linking Test..."
-	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) $(TEST_LIBS) -o $(TEST_TARGET)
-
-# Check if SDL2 is installed
-check:
-	echo "SDL Version: $(shell sdl2-config --version)"
-	echo "Doxygen Version: $(shell doxygen --version)"
-
-doc:
-	@doxygen docs/doxy.dox
+# miscellaneous
+format: 
+	echo "Formatting header- and source-files..."
+	indent $(FORMAT) $(HEADERS) $(SOURCES)
+	echo "Done."

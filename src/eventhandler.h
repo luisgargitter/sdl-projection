@@ -24,8 +24,6 @@ typedef struct{
 
 int32_t event_handler_init(event_handler_t* event_handler, SDL_Window* window, render_t* render);
 
-void event_handler_free(event_handler_t* event_handler);
-
 int32_t digest_events(event_handler_t* event_handler_t);
 
 #endif

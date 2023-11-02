@@ -33,10 +33,6 @@ vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
 
 matrix_3x3_t matrix_3x3_rotation(vec_3_t v);
 
-int apply_mat_3x3(matrix_3x3_t matrix, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);
-
-int apply_vec_3(vec_3_t vector, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res);
-
 vec_3_t vec_3(float x, float y, float z);
 
 vec_3_t vec_3_identity();
@@ -44,6 +40,10 @@ vec_3_t vec_3_identity();
 vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2);
 
 vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2);
+
+vec_3_t vec_3_scale(vec_3_t v, float s);
+
+vec_3_t vec_3_lerp(vec_3_t v1, vec_3_t v2, float t);
 
 vec_2_t vec_3_map_to_plane(vec_3_t v);
 

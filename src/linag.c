@@ -132,19 +132,3 @@ vec_2_t vec_3_map_to_plane(vec_3_t v) {
     vec_2_t v2 = {v.x / 0.000001, v.y / 0.000001};
     return v2;
 }
-
-int apply_mat_3x3(matrix_3x3_t m, const vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
-    for(int32_t i = 0; i < num_vertices; i++) {
-        res[i] = lmul(m, vertices[i]);
-    }
-
-    return 0;
-}
-
-int apply_vec_3(vec_3_t v, vec_3_t* vertices, int32_t num_vertices, vec_3_t* res) {
-    for(int32_t i = 0; i < num_vertices; i++) {
-        res[i] = ladd(v, vertices[i]);
-    }
-
-    return 0;
-}

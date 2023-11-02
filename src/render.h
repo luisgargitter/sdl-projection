@@ -29,12 +29,12 @@ typedef struct {
 
 int render_init(render_t* render, SDL_Window* window, float_t fov_ratio);
 
-void render_free(render_t* render);
+void render_cleanup(render_t render);
 
 int render_position(render_t* r);
 
 int render_add_object(render_t* render, asset_t* asset, matrix_3x3_t orientation, vec_3_t offset);
 
-int projectObjects(render_t* render);
+int render_frame(render_t* render);
 
 #endif

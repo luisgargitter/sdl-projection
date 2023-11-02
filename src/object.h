@@ -15,8 +15,6 @@ typedef struct {
     int32_t vf_count;
 } object_t;
 
-int object_position(object_t *object, matrix_3x3_t orientation, vec_3_t offset);
-
 int object_init(object_t* object, asset_t* a, matrix_3x3_t orientation, vec_3_t offset);
 
 void object_free(object_t* object);

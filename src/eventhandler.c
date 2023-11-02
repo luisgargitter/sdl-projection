@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <math.h>
 #include <SDL2/SDL_events.h>
 
 #include "linag.h"
@@ -26,11 +27,6 @@ int32_t event_handler_init(event_handler_t* e, SDL_Window* w, render_t* r) {
     return 0;
 }
 
-void event_handler_free(event_handler_t* e) {
-    render_free(e->render);
-    free(e->render);
-}
-
 int64_t millis() { // copy paste from stackoverflow (seems to be working)
     struct timespec now;
     timespec_get(&now, TIME_UTC);
@@ -39,7 +35,7 @@ int64_t millis() { // copy paste from stackoverflow (seems to be working)
 
 int print_debug(event_handler_t* e) {
     static int i = 0;
-    if(i % 16 == 0) {
+    if(i % POLL_EVENT_TIMEOUT_MS == 0) {
         printf("\033c"); // clear screen
         printf("Offset: x: %6f, y: %6f, z: %6f\n", e->render->offset.x, e->render->offset.y, e->render->offset.z);
         printf("Orientation: x-axis: %6f°, y-axis: %6f°\n", (e->x_angle / M_PI) * 180, (e->y_angle / M_PI) * 180);
@@ -97,15 +93,11 @@ int32_t digest_events(event_handler_t* e) {
                     // limiting vertical movement
                     e->x_angle = (e->x_angle < -M_PI / 2) ?  -M_PI / 2 : e->x_angle;
                     e->x_angle = (e->x_angle > M_PI / 2) ? M_PI / 2 : e->x_angle;
+					e->y_angle = fmod(e->y_angle, 2 * M_PI);
                 //}
                 break;
-
-            case SDL_MOUSEWHEEL:              
-                // mov_step *= s.wheel.preciseY > 0 ? 1.1 : 1;
-                // mov_step *= s.wheel.preciseY < 0 ? 0.9 : 1;
-                break;
-
-            // movement
+            
+			// movement
             case SDL_KEYDOWN:
                 kc = s.key.keysym.sym;
                 if(kc == SDLK_w) kw = true;
@@ -159,7 +151,7 @@ int32_t digest_events(event_handler_t* e) {
         matrix_3x3_apply(ro, v)
     );
     
-    retCode = projectObjects(e->render);
+    retCode = render_frame(e->render);
 
     return retCode;
 }

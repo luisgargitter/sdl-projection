@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <limits.h>
 
 #include <SDL2/SDL.h>
 
@@ -39,16 +40,16 @@ int render_init(render_t* r, SDL_Window *w, float_t fov) {
     return 0;
 }
 
-void render_free(render_t* p) {
-    SDL_DestroyRenderer(p->r);
+void render_cleanup(render_t p) {
+    SDL_DestroyRenderer(p.r);
 
-    for(int32_t i = 0; i < p->num_objects; i++) {
-        object_free(p->objects + i);
+    for(int32_t i = 0; i < p.num_objects; i++) {
+        object_free(p.objects + i);
     }
 
-    p->capacity_objects = 0;
-    p->num_objects = 0;
-    free(p->objects);
+    p.capacity_objects = 0;
+    p.num_objects = 0;
+    free(p.objects);
 }
 
 int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec_3_t offset) {
@@ -64,71 +65,40 @@ int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec
     return 0;
 }
 
-int render_position(render_t* r) {
-    for(int32_t i = 0; i < r->num_objects; i++) {
-        object_position(
-            r->objects + i,
-            r->objects[i].orientation, 
-            r->objects[i].offset
-        );
-        apply_vec_3(
-            r->offset,
-            r->objects[i].vertices_in_scene, 
-            r->objects[i].asset->v_count, 
-            r->objects[i].vertices_in_scene
-        );
-        apply_mat_3x3(r->orientation, r->objects[i].vertices_in_scene, r->objects[i].asset->v_count, r->objects[i].vertices_in_scene);
-    }
-
-    return 0;
+void position_object(render_t* r, object_t *o) {
+	vec_3_t glob_offset = vec_3_add(o->offset, r->offset);
+	for(int32_t j = 0; j < o->asset->v_count; j++) {
+		vec_3_t v = o->asset->v_vector[j];
+		v = matrix_3x3_apply(o->orientation, v);
+		v = vec_3_add(glob_offset, v);
+		v = matrix_3x3_apply(r->orientation, v);
+		o->vertices_in_scene[j] = v;
+	}
 }
 
-void projectCentral(render_t* r) {
+void project_object(render_t* r, object_t *o) {
     float centerx = (float) r->width / 2;
     float centery = (float) r->height / 2;
 
-    for(int32_t i = 0; i < r->num_objects; i++) {
-        object_t* o = r->objects + i;
-        vec_3_t* v = o->vertices_in_scene;
-
-        for(int32_t j = 0; j < o->asset->v_count; j++) {
-            vec_2_t v2 = vec_3_map_to_plane(v[j]);
-            o->proj_v[j].position.x = v2.x * r->scaled_fov + centerx;
-            o->proj_v[j].position.y = r->height - (v2.y * r->scaled_fov + centery);
-
-            //printf("%f %f\n", o->proj_v[j].position.x, o->proj_v[j].position.y);
-        }
+    vec_3_t* v = o->vertices_in_scene;
+    for(int32_t j = 0; j < o->asset->v_count; j++) {
+        vec_2_t v2 = vec_3_map_to_plane(v[j]);
+        o->proj_v[j].position.x = v2.x * r->scaled_fov + centerx;
+        o->proj_v[j].position.y = r->height - (v2.y * r->scaled_fov + centery);
     }
 }
 
-void applyColor(render_t* r) { // temp function for testing. will be replaced by shading function in future
-    // execute once
-    /*
-	static int i = 0;
-    if(i == 1) return;
-    i = 1;
-	*/
+void fog_shader(object_t *o) {
+	for(int32_t i = 0; i < o->asset->v_count; i++) {
+		vec_3_t *v = &o->vertices_in_scene[i];
+		SDL_Color *c = &o->proj_v[i].color;
+		float distance = vec_3_euclidean_distance(vec_3_identity(), *v);
+		float lightVal = powf(distance * 10, 1.5);
 
-    uint8_t colors[3] = {0, 127, 255};
-    srand((unsigned int) time(NULL));
-    
-    for (int32_t j = 0; j < r->num_objects; j++) {
-      object_t *o = r->objects + j;
-      vec_3_t* v = o->vertices_in_scene;
-      for (int32_t k = 0; k < o->asset->v_count; k++) {
-        float lightVal = 30 / powf(vec_3_euclidean_distance(vec_3_identity(), v[k]),1);
-        o->proj_v[k].color.r = (63 < lightVal) ? 63 : lightVal;
-        o->proj_v[k].color.g = (63 < lightVal) ? 63 : lightVal;
-        o->proj_v[k].color.b = (63 < lightVal) ? 63 : lightVal;
-        o->proj_v[k].color.r *= (k%11)%5;
-        o->proj_v[k].color.g *= (k%13)%5;
-        o->proj_v[k].color.b *= (k%17)%5;
-        //o->proj_v[k].color.r = rand();
-        //o->proj_v[k].color.g = rand();
-        //o->proj_v[k].color.b = rand();
-        o->proj_v[k].color.a = 255;
-      }
-    }
+		c->r = (63 < lightVal) ? 63 : lightVal;
+    	c->g = (63 < lightVal) ? 63 : lightVal;
+    	c->b = (63 < lightVal) ? 63 : lightVal;
+	}
 }
 
 int compFaces(const void* f1, const void* f2) {
@@ -153,7 +123,7 @@ bool is_in_front_of_camera(object_t* o, sortable_triangle s) {
     return false;
 }
 
-void determineVisible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
+void determine_visible(render_t* r) { // no touching! (holy grale of projection, boris allowed only)
     for(int32_t i = 0; i < r->num_objects; i++) {
         object_t* t = r->objects + i;
         t->vf_count = 0;
@@ -192,10 +162,9 @@ void determineVisible(render_t* r) { // no touching! (holy grale of projection, 
     }
 }
 
-int renderScene(render_t* r) {
+int display_scene(render_t* r) {
     SDL_SetRenderDrawColor(r->r, 0, 0, 0, 255);
     SDL_RenderClear(r->r);
-    //SDL_SetRenderDrawColor(r->r, 255, 255, 255, 255);
     
     for(int32_t i = 0; i < r->num_objects; i++) { 
         object_t* t = r->objects + i;
@@ -230,7 +199,7 @@ int fadenkreuz(render_t* r) { // does not work
         r->height - (v.y  * r->scaled_fov + r->height / 2.0)
     );
     
-v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
+	v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
     SDL_SetRenderDrawColor(r->r, 0, 0, 255, 255);
     SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
         v.x  * r->scaled_fov + r->width / 2.0, 
@@ -240,16 +209,22 @@ v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
     return 0; 
 }
 
+void render_objects(render_t* r) {
+	for(int32_t i = 0; i < r->num_objects; i++) {
+		object_t *o = r->objects + i;
+		position_object(r, o);
+		project_object(r, o);
+		fog_shader(o);
+	}
+}
 
-int projectObjects(render_t* r) {
-    render_position(r);
-    projectCentral(r);
-    determineVisible(r);
-    applyColor(r);
-    int r1 = renderScene(r);
+int render_frame(render_t* r) {
+	render_objects(r);
+    determine_visible(r);
+	display_scene(r);
 
-    fadenkreuz(r);
+	fadenkreuz(r);
 
     SDL_RenderPresent(r->r);
-    return r1;
+	return 0;
 }

@@ -7,13 +7,6 @@
 #include "asset.h"
 #include "linag.h"
 
-int object_position(object_t *o, matrix_3x3_t orientation, vec_3_t offset) {
-    apply_mat_3x3(orientation, o->asset->v_vector, o->asset->v_count, o->vertices_in_scene);
-    apply_vec_3(offset, o->vertices_in_scene, o->asset->v_count, o->vertices_in_scene);
-
-    return 0;
-}
-
 int object_init(object_t* o, asset_t* a, matrix_3x3_t orientation, vec_3_t offset) {
     a->ref_count++; // increasing reference count for automatic deallocation, when no longer in use
     o->asset = a;
