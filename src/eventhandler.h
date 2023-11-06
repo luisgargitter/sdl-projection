@@ -9,21 +9,22 @@
 
 #include "render.h"
 
-typedef struct{
-    SDL_Window* window;
-    render_t* render;
+typedef struct {
+	SDL_Window *window;
+	render_t *render;
 
-    int64_t time_of_last_frame;
+	int64_t time_of_last_frame;
 
-    bool quit_app;
-    bool init_done;
+	bool quit_app;
+	bool init_done;
 
-    float x_angle;
-    float y_angle;
+	float x_angle;
+	float y_angle;
 } event_handler_t;
 
-int32_t event_handler_init(event_handler_t* event_handler, SDL_Window* window, render_t* render);
+int32_t event_handler_init(event_handler_t * event_handler, SDL_Window * window,
+			   render_t * render);
 
-int32_t digest_events(event_handler_t* event_handler_t);
+int32_t digest_events(event_handler_t * event_handler_t);
 
 #endif

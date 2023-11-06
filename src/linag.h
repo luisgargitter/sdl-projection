@@ -1,72 +1,92 @@
-#ifndef SDL_PROJECTION_LINAG_H
-#define SDL_PROJECTION_LINAG_H
+#ifndef LINAG_H
+#define LINAG_H
 
-#include "stdint.h"
+#include <float.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
 
-typedef struct {
-    float x, y;
-} vec_2_t;
+#include <math.h>
 
-typedef struct {
-    float x, y, z;
-} vec_3_t;
+#ifdef LINAG_H_INLINE
+#define LINAG_H_FUNC static inline
+#else
+#define LINAG_H_FUNC static
+#endif
 
-typedef struct {
-    float m[9];
-} matrix_3x3_t;
+#define LINAG_DECLARE_VEC(n);												\
+typedef float vec##n##_t[n];												\
+																			\
+typedef vec##n##_t mat##n##x##n##_t[n];										\
 
-typedef struct
-{
-    float farthest;
-    int p1, p2, p3;
-} sortable_triangle;
-
-matrix_3x3_t matrix_3x3_identity();
-
-matrix_3x3_t matrix_3x3_transpose(matrix_3x3_t matrix);
-
-matrix_3x3_t matrix_3x3_add(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
-
-matrix_3x3_t matrix_3x3_multiply(matrix_3x3_t matrix1, matrix_3x3_t matrix2);
-
-vec_3_t matrix_3x3_apply(matrix_3x3_t matrix, vec_3_t vector);
-
-matrix_3x3_t matrix_3x3_rotation(vec_3_t v);
-
-vec_3_t vec_3(float x, float y, float z);
-
-vec_3_t vec_3_identity();
-
-vec_3_t vec_3_add(vec_3_t v1, vec_3_t v2);
-
-vec_3_t vec_3_subtract(vec_3_t v1, vec_3_t v2);
-
-vec_3_t vec_3_scale(vec_3_t v, float s);
-
-vec_3_t vec_3_lerp(vec_3_t v1, vec_3_t v2, float t);
-
-vec_2_t vec_3_map_to_plane(vec_3_t v);
-
-float vec_3_euclidean_distance(vec_3_t v1, vec_3_t v2);
-
-// ----- GENERICS -----
-
-#define ladd(X, Y) _Generic((X),            \
-    matrix_3x3_t: matrix_3x3_add,           \
-    vec_3_t: vec_3_add                      \
-)(X, Y)
-
-#define lsub(X, Y) _Generic((X),            \
-    vec_3_t: vec_3_subtract                 \
-)(X, Y)
-
-#define lmul(X, Y) _Generic((Y),            \
-    matrix_3x3_t: matrix_3x3_multiply,      \
-    vec_3_t: matrix_3x3_apply               \
-)(X, Y)
-
-#define leud(X, Y) _Generic((X),            \
-    vec_3_t: vec_3_euclidean_distance       \
-)(X, Y)
+#define LINAG_USE_VEC(n);													\
+LINAG_DECLARE_VEC(n);														\
+																			\
+LINAG_H_FUNC void vec##n##_add(												\
+	const vec##n##_t v1, const vec##n##_t v2, vec##n##_t r) { 				\
+	for(size_t i = 0; i < n; i++) 											\
+		r[i] = v1[i] + v2[i];												\
+}																			\
+																			\
+LINAG_H_FUNC void vec##n##_sub(												\
+	const vec##n##_t v1, const vec##n##_t v2, vec##n##_t r) { 				\
+	for(size_t i = 0; i < n; i++)											\
+		r[i] = v1[i] - v2[i];												\
+}																			\
+																			\
+LINAG_H_FUNC void vec##n##_scale(											\
+	const vec##n##_t v, float f, vec##n##_t r) {							\
+	for(size_t i = 0; i < n; i++) 											\
+		r[i] = f * v[i];													\
+}																			\
+																			\
+LINAG_H_FUNC float vec##n##_euclid_dist(									\
+	const vec##n##_t v1, const vec##n##_t v2) {								\
+    vec##n##_t v;															\
+	vec##n##_sub(v1, v2, v);												\
+	float acc = 0;															\
+	for(size_t i = 0; i < n; i++) 											\
+		acc += v[i];														\
+    return sqrtf(acc);														\
+}																			\
+																			\
+LINAG_H_FUNC float vec##n##_innerp(											\
+	const vec##n##_t v1, const vec##n##_t v2) { 							\
+	float acc = 0;															\
+	for(size_t i = 0; i < n; i++) 											\
+		acc += v1[i] * v2[i];												\
+	return acc;																\
+}																			\
+																			\
+LINAG_H_FUNC void vec##n##_outerp(											\
+	const vec##n##_t v1, const vec##n##_t v2, mat##n##x##n##_t r) {			\
+	for(size_t i = 0; i < n; i++)											\
+		for(size_t j = 0; j < n; j++) 										\
+			r[i][j] = v1[i] * v2[j];										\
+}																			\
+																			\
+LINAG_H_FUNC void vec##n##_lerp(											\
+	const vec##n##_t v1, const vec##n##_t v2, float f, vec##n##_t r) {		\
+	vec##n##_sub(v2, v1, r);												\
+	vec##n##_scale(r, f, r);												\
+	vec##n##_add(v1, r, r);													\
+}																			\
+																			\
+LINAG_H_FUNC void vec##n##_matp(											\
+	const mat##n##x##n##_t m, const vec##n##_t v, vec##n##_t r) {			\
+	for(size_t i = 0; i < n; i++) {											\
+		r[i] = 0;															\
+		for(size_t j = 0; j < n; j++)										\
+			r[i] += m[j][i] * v[j];											\
+	}																		\
+}																			\
+																			\
+LINAG_H_FUNC void mat##n##x##n##_mul(										\
+	const mat##n##x##n##_t m1, const mat##n##x##n##_t m2,	 				\
+	mat##n##x##n##_t r) {													\
+	for(size_t i = 0; i < n; i++) {											\
+		vec##n##_matp(m1, m2[i], r[i]);										\
+	}																		\
+}																			\
 
 #endif

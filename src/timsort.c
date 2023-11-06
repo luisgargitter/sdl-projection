@@ -18,7 +18,7 @@
 #include <assert.h>		// assert
 #include <errno.h>		// EINVAL
 #if defined(_MSC_VER)
-# include <malloc.h>		// _alloca
+#include <malloc.h>		// _alloca
 #endif
 #include <stddef.h>		// size_t, NULL
 #include <stdlib.h>		// malloc, free
@@ -72,9 +72,9 @@
 /* #undef MALLOC_STACK */
 
 #if defined(_MSC_VER)
-# define DEFINE_TEMP(temp) void *temp = _alloca(WIDTH)
+#define DEFINE_TEMP(temp) void *temp = _alloca(WIDTH)
 #else
-# define DEFINE_TEMP(temp) char temp[WIDTH]
+#define DEFINE_TEMP(temp) char temp[WIDTH]
 #endif
 
 #define ASSIGN(x, y) memcpy(x, y, WIDTH)
@@ -92,13 +92,12 @@
 #define NAME(x) MAKE_STR(x, WIDTH)
 #define CALL(x) NAME(x)
 
-
 #ifdef IS_TIMSORT_R
 /*
  * Note order of elements to comparator matches that of C11 qsort_s,
  * not BSD qsort_r or Windows qsort_s
  */
-typedef int (*comparator) (const void *x, const void *y, void *thunk);
+typedef int (*comparator)(const void *x, const void *y, void *thunk);
 #define CMPPARAMS(compar, thunk) comparator compar, void *thunk
 #define CMPARGS(compar, thunk) (compar), (thunk)
 #define CMP(compar, thunk, x, y) (compar((x), (y), (thunk)))
@@ -106,13 +105,13 @@ typedef int (*comparator) (const void *x, const void *y, void *thunk);
 
 #else
 
-typedef int (*comparator) (const void *x, const void *y);
+typedef int (*comparator)(const void *x, const void *y);
 #define CMPPARAMS(compar, thunk) comparator compar
 #define CMPARGS(compar, thunk) (compar)
 #define CMP(compar, thunk, x, y) (compar((x), (y)))
 #define TIMSORT timsort
 
-#endif /* IS_TIMSORT_R */
+#endif				/* IS_TIMSORT_R */
 
 struct timsort_run {
 	void *base;
@@ -167,8 +166,7 @@ struct timsort {
 };
 
 static int timsort_init(struct timsort *ts, void *a, size_t len,
-			CMPPARAMS(c, carg),
-			size_t width);
+			CMPPARAMS(c, carg), size_t width);
 static void timsort_deinit(struct timsort *ts);
 static size_t minRunLength(size_t n);
 static void pushRun(struct timsort *ts, void *runBase, size_t runLen);
@@ -184,8 +182,7 @@ static void *ensureCapacity(struct timsort *ts, size_t minCapacity,
  * @param width the element width
  */
 static int timsort_init(struct timsort *ts, void *a, size_t len,
-			CMPPARAMS(c, carg),
-			size_t width)
+			CMPPARAMS(c, carg), size_t width)
 {
 	int err = 0;
 
@@ -402,7 +399,6 @@ static void *ensureCapacity(struct timsort *ts, size_t minCapacity,
 #define WIDTH width
 #include "timsort-impl.h"
 #undef WIDTH
-
 
 int TIMSORT(void *a, size_t nel, size_t width, CMPPARAMS(c, carg))
 {
