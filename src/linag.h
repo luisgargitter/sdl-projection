@@ -88,5 +88,11 @@ LINAG_H_FUNC void mat##n##x##n##_mul(										\
 		vec##n##_matp(m1, m2[i], r[i]);										\
 	}																		\
 }																			\
+																			\
+LINAG_H_FUNC void mat##n##x##n##_transp(									\
+	const mat##n##x##n##_t m, mat##n##x##n##_t r) {							\
+	for(size_t i = 0; i < n; i++)											\
+		for(size_t j = 0; j < n; j++) r[i][j] = m[j][i];					\
+} 																			\
 
 #endif
