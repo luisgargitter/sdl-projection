@@ -74,9 +74,9 @@ void position_object(render_t *r, object_t *o) {
     vec3_t glob_offset = vec3_add(o->offset, r->offset);
     for (int32_t j = 0; j < o->asset->v_count; j++) {
         vec3_t v = o->asset->v_vector[j];
-        v = mat3_apply(o->orientation, v);
+        v = mat3_mul(o->orientation, v);
         v = vec3_add(glob_offset, v);
-        v = mat3_apply(r->orientation, v);
+        v = mat3_mul(r->orientation, v);
         o->vertices_in_scene[j] = v;
     }
 }
@@ -205,19 +205,19 @@ int fadenkreuz(render_t *r) { // does not work
     vec3_t v2 = {0, 1, 0};
     vec3_t v3 = {0, 0, 1};
     vec2_t v;
-    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v1)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_mul(r->orientation, v1)));
     SDL_SetRenderDrawColor(r->r, 255, 0, 0, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,
                        r->height - (v.y * r->scaled_fov + r->height / 2.0));
 
-    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v2)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_mul(r->orientation, v2)));
     SDL_SetRenderDrawColor(r->r, 0, 255, 0, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,
                        r->height - (v.y * r->scaled_fov + r->height / 2.0));
 
-    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v3)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_mul(r->orientation, v3)));
     SDL_SetRenderDrawColor(r->r, 0, 0, 255, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,

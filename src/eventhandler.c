@@ -158,7 +158,7 @@ int32_t digest_events(event_handler_t *e) {
     mat3_t ro = mat3_matmul(mat3_rotation(vec3(0, -e->y_angle, 0)),
                      mat3_rotation(vec3(-e->x_angle, 0, 0)));
 
-    e->render->offset = vec3_add(e->render->offset, mat3_apply(ro, v));
+    e->render->offset = vec3_add(e->render->offset, mat3_mul(ro, v));
 
     retCode = render_frame(e->render);
 

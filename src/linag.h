@@ -28,7 +28,7 @@ mat3_t mat3_add(mat3_t matrix1, mat3_t matrix2);
 
 mat3_t mat3_matmul(mat3_t matrix1, mat3_t matrix2);
 
-vec3_t mat3_apply(mat3_t matrix, vec3_t vector);
+vec3_t mat3_mul(mat3_t matrix, vec3_t vector);
 
 mat3_t mat3_rotation(vec3_t v);
 

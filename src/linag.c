@@ -49,7 +49,7 @@ mat3_t mat3_matmul(mat3_t matrix1, mat3_t matrix2) {
     return res;
 }
 
-vec3_t mat3_apply(mat3_t matrix, vec3_t vector) {
+vec3_t mat3_mul(mat3_t matrix, vec3_t vector) {
     float v[3] = {vector.x, vector.y, vector.z};
     float t[3] = {0, 0, 0};
     for (int32_t i = 0; i < 3; i++) {
