@@ -15,8 +15,7 @@ typedef struct {
     float m[9];
 } mat3_t;
 
-typedef struct
-{
+typedef struct {
     float farthest;
     int p1, p2, p3;
 } sortable_triangle;
@@ -51,22 +50,13 @@ float vec3_euclidean_distance(vec3_t v1, vec3_t v2);
 
 // ----- GENERICS -----
 
-#define ladd(X, Y) _Generic((X),            \
-    mat3_t: mat3_add,           \
-    vec3_t: vec3_add                      \
-)(X, Y)
+#define ladd(X, Y) _Generic((X), mat3_t: mat3_add, vec3_t: vec3_add)(X, Y)
 
-#define lsub(X, Y) _Generic((X),            \
-    vec3_t: vec3_subtract                 \
-)(X, Y)
+#define lsub(X, Y) _Generic((X), vec3_t: vec3_subtract)(X, Y)
 
-#define lmul(X, Y) _Generic((Y),            \
-    mat3_t: mat3_multiply,      \
-    vec3_t: mat3_apply               \
-)(X, Y)
+#define lmul(X, Y)                                                             \
+    _Generic((Y), mat3_t: mat3_multiply, vec3_t: mat3_apply)(X, Y)
 
-#define leud(X, Y) _Generic((X),            \
-    vec3_t: vec3_euclidean_distance       \
-)(X, Y)
+#define leud(X, Y) _Generic((X), vec3_t: vec3_euclidean_distance)(X, Y)
 
 #endif

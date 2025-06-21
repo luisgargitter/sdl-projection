@@ -1,19 +1,15 @@
 #include "linag.h"
 
 #include <float.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <math.h>
 
 mat3_t mat3_identity() {
-    mat3_t r = {{
-        1, 0, 0, 
-        0, 1, 0, 
-        0, 0, 1
-    }};
-    
+    mat3_t r = {{1, 0, 0, 0, 1, 0, 0, 0, 1}};
+
     return r;
 }
 
@@ -22,19 +18,14 @@ mat3_t mat3_rotation(vec3_t v) {
     float y = v.y;
     float z = v.z;
 
-    mat3_t r = {{
-        cosf(y) * cosf(z), 
-        sinf(x) * sinf(y) * cosf(z) - cosf(x) * sinf(z), 
-        cosf(x) * sinf(y) * cosf(z) + sinf(x) * sinf(z),
-        
-        cosf(y) * sinf(z),
-        sinf(x) * sinf(y) * sinf(z) + cosf(x) * cosf(z),
-        cosf(x) * sinf(y) * sinf(z) - sinf(x) * cosf(z),
+    mat3_t r = {
+        {cosf(y) * cosf(z), sinf(x) * sinf(y) * cosf(z) - cosf(x) * sinf(z),
+         cosf(x) * sinf(y) * cosf(z) + sinf(x) * sinf(z),
 
-        -sinf(y),
-        sinf(x) * cosf(y),
-        cosf(x) * cosf(y)
-    }};
+         cosf(y) * sinf(z), sinf(x) * sinf(y) * sinf(z) + cosf(x) * cosf(z),
+         cosf(x) * sinf(y) * sinf(z) - sinf(x) * cosf(z),
+
+         -sinf(y), sinf(x) * cosf(y), cosf(x) * cosf(y)}};
 
     return r;
 }
@@ -46,11 +37,11 @@ mat3_t mat3_add(mat3_t matrix1, mat3_t matrix2) {
 
 mat3_t mat3_multiply(mat3_t matrix1, mat3_t matrix2) {
     mat3_t res;
-    for(int32_t i = 0; i < 3; i++) {
-        for(int32_t j = 0; j < 3; j++) {
+    for (int32_t i = 0; i < 3; i++) {
+        for (int32_t j = 0; j < 3; j++) {
             res.m[i * 3 + j] = 0;
-            for(int32_t k = 0; k < 3; k++) {
-                res.m[i * 3 + j] += matrix1.m[i * 3 + k] * matrix2.m[j + k * 3];  
+            for (int32_t k = 0; k < 3; k++) {
+                res.m[i * 3 + j] += matrix1.m[i * 3 + k] * matrix2.m[j + k * 3];
             }
         }
     }
@@ -61,9 +52,9 @@ mat3_t mat3_multiply(mat3_t matrix1, mat3_t matrix2) {
 vec3_t mat3_apply(mat3_t matrix, vec3_t vector) {
     float v[3] = {vector.x, vector.y, vector.z};
     float t[3] = {0, 0, 0};
-    for(int32_t i = 0; i < 3; i++) {
-        for(int32_t j = 0; j < 3; j++) {
-            t[i] += matrix.m[i * 3 + j] * v[j];          
+    for (int32_t i = 0; i < 3; i++) {
+        for (int32_t j = 0; j < 3; j++) {
+            t[i] += matrix.m[i * 3 + j] * v[j];
         }
     }
 
@@ -83,37 +74,28 @@ vec3_t vec3_identity() {
 }
 
 vec3_t vec3_add(vec3_t v1, vec3_t v2) {
-    vec3_t r = {
-        v1.x + v2.x,
-        v1.y + v2.y,
-        v1.z + v2.z
-    };
+    vec3_t r = {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z};
 
     return r;
 }
 
 vec3_t vec3_subtract(vec3_t v1, vec3_t v2) {
-    vec3_t r = {
-        v1.x - v2.x,
-        v1.y - v2.y,
-        v1.z - v2.z
-    };
+    vec3_t r = {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
 
     return r;
 }
 
-vec3_t vec3_scale(vec3_t v, float s) {
-	return vec3(v.x * s, v.y * s, v.z * s);
-}
+vec3_t vec3_scale(vec3_t v, float s) { return vec3(v.x * s, v.y * s, v.z * s); }
 
-/** @brief returns the linear-interpolated Point between v1 and v2 that is part t away from v1.
+/** @brief returns the linear-interpolated Point between v1 and v2 that is part
+ * t away from v1.
  * @param v1 Point 1.
  * @param v2 Point 2.
  * @param z value between 0 and 1.
  * @return Point between v1 and v2.
  */
 vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t) {
-	return vec3_add(v1, vec3_scale(vec3_subtract(v2, v1), t));
+    return vec3_add(v1, vec3_scale(vec3_subtract(v2, v1), t));
 }
 
 float vec3_euclidean_distance(vec3_t v1, vec3_t v2) {
@@ -123,12 +105,11 @@ float vec3_euclidean_distance(vec3_t v1, vec3_t v2) {
 }
 
 vec2_t vec3_map_to_plane(vec3_t v) {
-    if (v.z > 0.0)
-    {
+    if (v.z > 0.0) {
         vec2_t v2 = {v.x / v.z, v.y / v.z};
         return v2;
     }
-	// ----- pfusch!!! -----
+    // ----- pfusch!!! -----
     vec2_t v2 = {v.x / 0.000001, v.y / 0.000001};
     return v2;
 }

@@ -84,5 +84,5 @@ clean:
 # miscellaneous
 format: 
 	echo "Formatting header- and source-files..."
-	indent $(FORMAT) $(HEADERS) $(SOURCES)
+	clang-format -i $(SOURCES) $(HEADERS)
 	echo "Done."
