@@ -34,8 +34,8 @@ int render_init(render_t* r, SDL_Window *w, float_t fov) {
     r->fov_ratio = tanf(fov / 2.0);
     r->scaled_fov = fminf(r->width, r->height) * r->fov_ratio;
 
-    r->orientation = matrix_3x3_rotation(vec_3(0, 0, 0));
-    r->offset = vec_3(0, 0, 0);
+    r->orientation = mat3_rotation(vec3(0, 0, 0));
+    r->offset = vec3(0, 0, 0);
     
     return 0;
 }
@@ -52,7 +52,7 @@ void render_cleanup(render_t p) {
     free(p.objects);
 }
 
-int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec_3_t offset) {
+int render_add_object(render_t* r, asset_t* asset, mat3_t orientation, vec3_t offset) {
     if(r->num_objects >= r->capacity_objects) {
         r->capacity_objects *= 2;
         r->objects = realloc(r->objects, r->capacity_objects);
@@ -66,12 +66,12 @@ int render_add_object(render_t* r, asset_t* asset, matrix_3x3_t orientation, vec
 }
 
 void position_object(render_t* r, object_t *o) {
-	vec_3_t glob_offset = vec_3_add(o->offset, r->offset);
+	vec3_t glob_offset = vec3_add(o->offset, r->offset);
 	for(int32_t j = 0; j < o->asset->v_count; j++) {
-		vec_3_t v = o->asset->v_vector[j];
-		v = matrix_3x3_apply(o->orientation, v);
-		v = vec_3_add(glob_offset, v);
-		v = matrix_3x3_apply(r->orientation, v);
+		vec3_t v = o->asset->v_vector[j];
+		v = mat3_apply(o->orientation, v);
+		v = vec3_add(glob_offset, v);
+		v = mat3_apply(r->orientation, v);
 		o->vertices_in_scene[j] = v;
 	}
 }
@@ -80,9 +80,9 @@ void project_object(render_t* r, object_t *o) {
     float centerx = (float) r->width / 2;
     float centery = (float) r->height / 2;
 
-    vec_3_t* v = o->vertices_in_scene;
+    vec3_t* v = o->vertices_in_scene;
     for(int32_t j = 0; j < o->asset->v_count; j++) {
-        vec_2_t v2 = vec_3_map_to_plane(v[j]);
+        vec2_t v2 = vec3_map_to_plane(v[j]);
         o->proj_v[j].position.x = v2.x * r->scaled_fov + centerx;
         o->proj_v[j].position.y = r->height - (v2.y * r->scaled_fov + centery);
     }
@@ -90,9 +90,9 @@ void project_object(render_t* r, object_t *o) {
 
 void fog_shader(object_t *o) {
 	for(int32_t i = 0; i < o->asset->v_count; i++) {
-		vec_3_t *v = &o->vertices_in_scene[i];
+		vec3_t *v = &o->vertices_in_scene[i];
 		SDL_Color *c = &o->proj_v[i].color;
-		float distance = vec_3_euclidean_distance(vec_3_identity(), *v);
+		float distance = vec3_euclidean_distance(vec3_identity(), *v);
 		float lightVal = powf(distance * 10, 1.5);
 
 		c->r = (63 < lightVal) ? 63 : lightVal;
@@ -116,7 +116,7 @@ void sortFaces(object_t *obj) {
 }
 
 bool is_in_front_of_camera(object_t* o, sortable_triangle s) {
-    vec_3_t* v =  o->vertices_in_scene;
+    vec3_t* v =  o->vertices_in_scene;
     if(v[s.p1].z > 0) return true;
     if(v[s.p2].z > 0) return true;
     if(v[s.p3].z > 0) return true;
@@ -130,10 +130,10 @@ void determine_visible(render_t* r) { // no touching! (holy grale of projection,
 
         for(int32_t f = 0; f < t->asset->f_count; f++){
             sortable_triangle* st = &(t->vf_sortable[f]);
-            vec_3_t *v = t->vertices_in_scene;
-            float_t dist1 = leud(v[st->p1], vec_3_identity());
-            float_t dist2 = leud(v[st->p2], vec_3_identity());
-            float_t dist3 = leud(v[st->p3], vec_3_identity());
+            vec3_t *v = t->vertices_in_scene;
+            float_t dist1 = leud(v[st->p1], vec3_identity());
+            float_t dist2 = leud(v[st->p2], vec3_identity());
+            float_t dist3 = leud(v[st->p3], vec3_identity());
             float_t max = fmaxf(dist1, dist2);
             max = fmaxf(max, dist3);
             st->farthest = max;
@@ -180,26 +180,26 @@ int display_scene(render_t* r) {
 }
 
 int fadenkreuz(render_t* r) { // does not work
-    vec_3_t o = {0, 0, 10}; 
-    vec_3_t v1 = {1, 0, 0};
-    vec_3_t v2 = {0, 1, 0};
-    vec_3_t v3 = {0, 0, 1};
-    vec_2_t v;
-    v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v1)));
+    vec3_t o = {0, 0, 10};
+    vec3_t v1 = {1, 0, 0};
+    vec3_t v2 = {0, 1, 0};
+    vec3_t v3 = {0, 0, 1};
+    vec2_t v;
+    v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v1)));
     SDL_SetRenderDrawColor(r->r, 255, 0, 0, 255);
     SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
         v.x  * r->scaled_fov + r->width / 2.0, 
         r->height - (v.y  * r->scaled_fov + r->height / 2.0)
     );
     
-    v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v2)));
+    v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v2)));
     SDL_SetRenderDrawColor(r->r, 0, 255, 0, 255);    
     SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
         v.x  * r->scaled_fov + r->width / 2.0, 
         r->height - (v.y  * r->scaled_fov + r->height / 2.0)
     );
     
-	v = vec_3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
+	v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
     SDL_SetRenderDrawColor(r->r, 0, 0, 255, 255);
     SDL_RenderDrawLine(r->r, r->width/2, r->height/2, 
         v.x  * r->scaled_fov + r->width / 2.0, 

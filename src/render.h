@@ -23,8 +23,8 @@ typedef struct {
     int32_t capacity_objects;	///< Capacity of the objects array
     object_t* objects;          ///< Vector containing the objects to be rendered
     
-    matrix_3x3_t orientation;   ///< Global delta orientation (camera angle)
-    vec_3_t offset;             ///< Global delta offset (camera position)
+    mat3_t orientation;   ///< Global delta orientation (camera angle)
+    vec3_t offset;             ///< Global delta offset (camera position)
 } render_t;
 
 int render_init(render_t* render, SDL_Window* window, float_t fov_ratio);
@@ -33,7 +33,7 @@ void render_cleanup(render_t render);
 
 int render_position(render_t* r);
 
-int render_add_object(render_t* render, asset_t* asset, matrix_3x3_t orientation, vec_3_t offset);
+int render_add_object(render_t* render, asset_t* asset, mat3_t orientation, vec3_t offset);
 
 int render_frame(render_t* render);
 

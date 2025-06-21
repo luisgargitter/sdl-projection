@@ -22,19 +22,19 @@
 #define WIDTH 800
 #define HEIGHT 600
 
-#define FOV M_PI / 2
+#define FOV (M_PI / 2)
 
-#define main_def_handle(f) 		\
+#define main_def_handle(f) 		                \
 	switch(f) {					\
-	case 0: break;				\
+	case 0: break;				        \
 	case -1:					\
-		perror(argv[0]);		\
+		perror(argv[0]);		        \
 		assert(0);				\
-		return EXIT_FAILURE;	\
+		return EXIT_FAILURE;	                \
 	case -2:					\
 		fprintf(stderr, "%s: %s\n", argv[0], SDL_GetError()); \
 		assert(0);				\
-		return EXIT_FAILURE;	\
+		return EXIT_FAILURE;	                \
 	default:					\
 		assert(0);				\
 }
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     
     SDL_Window* w;
     render_t r;
-	event_handler_t e;
+  event_handler_t e;
 
 	main_def_handle(sdl_window_setup(&w));
 
@@ -99,9 +99,9 @@ int main(int argc, char **argv) {
 
     fclose(f);
 
-	matrix_3x3_t m = matrix_3x3_rotation(vec_3(0, 0, 0));
+	mat3_t m = mat3_rotation(vec3(0, 0, 0));
      
-    render_add_object(&r, &a, m, vec_3(0, 0, 0));
+    render_add_object(&r, &a, m, vec3(0, 0, 0));
 
     while(e.quit_app == false) digest_events(&e);
 

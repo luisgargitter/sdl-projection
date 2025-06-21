@@ -20,14 +20,14 @@
 
 // .obj file parsing
 
-int32_t obj_scan_vec_3(vec_3_t* v, char* string) {
+int32_t obj_scan_vec_3(vec3_t* v, char* string) {
     // expection a string containing 3 floating point numbers
     int32_t matched = sscanf(string, "%f %f %f", &v->x, &v->y, &v->z);
     
     return matched == 3 ? 0 : -1;
 }
 
-int32_t obj_scan_vec_2(vec_2_t* v, char* string) {
+int32_t obj_scan_vec_2(vec2_t* v, char* string) {
     // expecting a string containing 3 floating point numbers
     int32_t matched = sscanf(string, "%f %f", &v->x, &v->y);
     

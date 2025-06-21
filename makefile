@@ -13,7 +13,7 @@ CFLAGS = -std=c11 -pedantic -Wall 			\
 -DNDEBUG -D_GNU_SOURCE -c
 
 # Flags for linking
-LFLAGS = $(LIBS)
+LFLAGS =
 
 # Flags for debug compilation
 # UNDEBUG	... undefines NDEBUG (enables asserts)

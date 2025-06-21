@@ -52,7 +52,7 @@ int32_t digest_events(event_handler_t* e) {
     SDL_Event s;
     static int64_t time_since_last_frame = POLL_EVENT_TIMEOUT_MS;
 
-    vec_3_t v = vec_3(0, 0, 0);
+    vec3_t v = vec3(0, 0, 0);
     static bool kw = false;
     static bool ka = false;
     static bool ks = false;
@@ -137,18 +137,18 @@ int32_t digest_events(event_handler_t* e) {
 
 
     e->render->orientation = lmul(
-        matrix_3x3_rotation(vec_3(e->x_angle, 0, 0)), 
-        matrix_3x3_rotation(vec_3(0, e->y_angle, 0))
+        mat3_rotation(vec3(e->x_angle, 0, 0)),
+        mat3_rotation(vec3(0, e->y_angle, 0))
     );
     
     // past movement needs to be rotated opposed to rest (order of multiplication must also be reversed)
-    matrix_3x3_t ro =  lmul(
-        matrix_3x3_rotation(vec_3(0, -e->y_angle, 0)), 
-        matrix_3x3_rotation(vec_3(-e->x_angle, 0, 0))
+    mat3_t ro =  lmul(
+        mat3_rotation(vec3(0, -e->y_angle, 0)),
+        mat3_rotation(vec3(-e->x_angle, 0, 0))
     );
 
     e->render->offset = ladd(e->render->offset, 
-        matrix_3x3_apply(ro, v)
+        mat3_apply(ro, v)
     );
     
     retCode = render_frame(e->render);

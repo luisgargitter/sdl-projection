@@ -7,7 +7,7 @@
 #include "asset.h"
 #include "linag.h"
 
-int object_init(object_t* o, asset_t* a, matrix_3x3_t orientation, vec_3_t offset) {
+int object_init(object_t* o, asset_t* a, mat3_t orientation, vec3_t offset) {
     a->ref_count++; // increasing reference count for automatic deallocation, when no longer in use
     o->asset = a;
     o->asset->ref_count++;
