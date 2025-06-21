@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "linag.h"
+#include "array.h"
 
 /**
  * @brief Asset in memory
@@ -22,21 +23,12 @@ typedef struct {
     int32_t ref_count; ///< Number of times it is being referenced (for
                        ///< automatic deallocation)
 
-    int32_t v_count;  ///< Number of vertices
-    vec3_t *v_vector; ///< Vector, containing the vertices (has length v_count)
-
-    int32_t n_count;
-    vec3_t *n_vector; ///< Vector, specifying the vertices normals (not
-                      ///< normalized, has length v_count)
+    array_t *vertices;
+    array_t *normals;
+    array_t *uvcoordinates;
+    array_t *faces;
 
     SDL_Texture *t; ///< (optional)
-    int32_t t_count;
-    vec2_t *t_vector; ///< Vector, specifying the vertices texture coordinates
-                      ///< (optional, has length v_count)
-
-    int32_t f_count;     ///< Number of faces in the mesh
-    surface_t *f_vector; ///< Vector, containing the faces (index triplets in
-                         ///< v_vector describing triangles)
 } asset_t;
 
 void asset_load_obj(FILE *file, asset_t *asset);

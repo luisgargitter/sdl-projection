@@ -17,16 +17,17 @@ int object_init(object_t *o, asset_t *a, mat3_t orientation, vec3_t offset) {
     o->offset = offset;
 
     o->vertices_in_scene =
-        malloc(sizeof(*o->vertices_in_scene) * o->asset->v_count);
-    o->proj_v = malloc(sizeof(*o->proj_v) * o->asset->v_count);
+        malloc(sizeof(*o->vertices_in_scene) * array_length(o->asset->vertices));
+    o->proj_v = malloc(sizeof(*o->proj_v) * array_length(o->asset->vertices));
     o->visible_faces =
-        malloc(sizeof(*o->visible_faces) * o->asset->f_count * 3);
-    o->vf_sortable = malloc(sizeof(sortable_triangle) * o->asset->f_count);
+        malloc(sizeof(*o->visible_faces) * array_length(o->asset->faces) * 3);
+    o->vf_sortable = malloc(sizeof(sortable_triangle) * array_length(o->asset->faces));
 
-    for (int i = 0; i < o->asset->f_count; i++) {
-        o->vf_sortable[i].p1 = o->asset->f_vector[i].vertex[0];
-        o->vf_sortable[i].p2 = o->asset->f_vector[i].vertex[1];
-        o->vf_sortable[i].p3 = o->asset->f_vector[i].vertex[2];
+    for (int i = 0; i < array_length(o->asset->faces); i++) {
+        surface_t tsf = *(surface_t *) array_at(o->asset->faces, i);
+        o->vf_sortable[i].p1 = tsf.vertex[0];
+        o->vf_sortable[i].p2 = tsf.vertex[1];
+        o->vf_sortable[i].p3 = tsf.vertex[2];
     }
 
     return 0;
