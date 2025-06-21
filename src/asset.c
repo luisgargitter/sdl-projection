@@ -104,8 +104,17 @@ int obj_proc_line(asset_t *asset, char *line) {
 
         array_push(asset->faces, &s);
         break;
+    case 's':
+        // whatever that does
+        break;
+    case 'u':
+        // allow usemtl (use material)
+        break;
+    case '#':
+        // allow comments
+        break;
     case '\n':
-        // empty lines allowed
+        // allow empty lines
         break;
     default:
         return -1; // invalid format
@@ -134,7 +143,7 @@ void asset_load_obj(FILE *f, asset_t *a) {
 
     // filtering optional data.
     if (contains_vertex_normals == false) {
-        array_free(a->vertices);
+        array_free(a->normals);
         a->normals = NULL;
     }
     if (contains_texture_coordinates == false) {
