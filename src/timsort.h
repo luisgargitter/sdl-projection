@@ -1,5 +1,7 @@
 #ifndef TIMSORT_H
 #define TIMSORT_H
+
+#include <stdlib.h>
 /*
  * Copyright (C) 2011 Patrick O. Perry
  * Copyright (C) 2008 The Android Open Source Project

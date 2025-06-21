@@ -35,7 +35,7 @@ mat3_t mat3_add(mat3_t matrix1, mat3_t matrix2) {
     return mat3_identity();
 }
 
-mat3_t mat3_multiply(mat3_t matrix1, mat3_t matrix2) {
+mat3_t mat3_matmul(mat3_t matrix1, mat3_t matrix2) {
     mat3_t res;
     for (int32_t i = 0; i < 3; i++) {
         for (int32_t j = 0; j < 3; j++) {
@@ -99,7 +99,7 @@ vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t) {
 }
 
 float vec3_euclidean_distance(vec3_t v1, vec3_t v2) {
-    vec3_t v = lsub(v1, v2);
+    vec3_t v = vec3_subtract(v1, v2);
     float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
     return sqrtf(len);
 }

@@ -16,7 +16,6 @@
 #include "object.h"
 #include "projection_error.h"
 #include "render.h"
-#include "test.h"
 
 #define TITLE "SDL-Projection"
 #define WIDTH 800

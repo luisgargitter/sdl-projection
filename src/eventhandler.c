@@ -150,15 +150,15 @@ int32_t digest_events(event_handler_t *e) {
     v.x += ka == true ? mov_step : 0;
     v.x -= kd == true ? mov_step : 0;
 
-    e->render->orientation = lmul(mat3_rotation(vec3(e->x_angle, 0, 0)),
+    e->render->orientation = mat3_matmul(mat3_rotation(vec3(e->x_angle, 0, 0)),
                                   mat3_rotation(vec3(0, e->y_angle, 0)));
 
     // past movement needs to be rotated opposed to rest (order of
     // multiplication must also be reversed)
-    mat3_t ro = lmul(mat3_rotation(vec3(0, -e->y_angle, 0)),
+    mat3_t ro = mat3_matmul(mat3_rotation(vec3(0, -e->y_angle, 0)),
                      mat3_rotation(vec3(-e->x_angle, 0, 0)));
 
-    e->render->offset = ladd(e->render->offset, mat3_apply(ro, v));
+    e->render->offset = vec3_add(e->render->offset, mat3_apply(ro, v));
 
     retCode = render_frame(e->render);
 

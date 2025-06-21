@@ -141,9 +141,9 @@ void determine_visible(render_t *r) { // no touching! (holy grale of projection,
         for (int32_t f = 0; f < t->asset->f_count; f++) {
             sortable_triangle *st = &(t->vf_sortable[f]);
             vec3_t *v = t->vertices_in_scene;
-            float_t dist1 = leud(v[st->p1], vec3_identity());
-            float_t dist2 = leud(v[st->p2], vec3_identity());
-            float_t dist3 = leud(v[st->p3], vec3_identity());
+            float_t dist1 = vec3_euclidean_distance(v[st->p1], vec3_identity());
+            float_t dist2 = vec3_euclidean_distance(v[st->p2], vec3_identity());
+            float_t dist3 = vec3_euclidean_distance(v[st->p3], vec3_identity());
             float_t max = fmaxf(dist1, dist2);
             max = fmaxf(max, dist3);
             st->farthest = max;
@@ -205,19 +205,19 @@ int fadenkreuz(render_t *r) { // does not work
     vec3_t v2 = {0, 1, 0};
     vec3_t v3 = {0, 0, 1};
     vec2_t v;
-    v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v1)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v1)));
     SDL_SetRenderDrawColor(r->r, 255, 0, 0, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,
                        r->height - (v.y * r->scaled_fov + r->height / 2.0));
 
-    v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v2)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v2)));
     SDL_SetRenderDrawColor(r->r, 0, 255, 0, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,
                        r->height - (v.y * r->scaled_fov + r->height / 2.0));
 
-    v = vec3_map_to_plane(ladd(o, lmul(r->orientation, v3)));
+    v = vec3_map_to_plane(vec3_add(o, mat3_apply(r->orientation, v3)));
     SDL_SetRenderDrawColor(r->r, 0, 0, 255, 255);
     SDL_RenderDrawLine(r->r, r->width / 2, r->height / 2,
                        v.x * r->scaled_fov + r->width / 2.0,
