@@ -27,6 +27,10 @@ vec2_t vec2_mul(vec2_t a, float c) {
     return v;
 }
 
+float vec2_cross(vec2_t v1, vec2_t v2) {
+    return v1.x * v2.y - v1.y * v2.x;
+}
+
 mat3_t mat3_identity() {
     mat3_t r = {{1, 0, 0, 0, 1, 0, 0, 0, 1}};
 
@@ -118,8 +122,6 @@ vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t) {
     return vec3_add(v1, vec3_mul(vec3_subtract(v2, v1), t));
 }
 
-float vec3_euclidean_distance(vec3_t v1, vec3_t v2) {
-    vec3_t v = vec3_subtract(v1, v2);
-    float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
-    return sqrtf(len);
+float vec3_length(vec3_t v) {
+    return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }

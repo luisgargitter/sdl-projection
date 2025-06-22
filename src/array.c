@@ -69,6 +69,17 @@ int32_t array_trim(array_t *a) {
     return array_resize(a, array_length(a));
 }
 
+void array_truncate(array_t *a, uint32_t length) {
+    assert(a != NULL);
+    a->length = length;
+}
+
+void array_clear(array_t *a) {
+    assert(a != NULL);
+
+    a->length = 0;
+}
+
 uint32_t array_length(array_t *a) {
     assert(a != NULL);
     return a->length;

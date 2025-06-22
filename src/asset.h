@@ -20,6 +20,11 @@ typedef struct {
 } surface_t;
 
 typedef struct {
+  float farthest;
+  surface_t *surface;
+} sortable_surface_t;
+
+typedef struct {
     int32_t ref_count; ///< Number of times it is being referenced (for
                        ///< automatic deallocation)
 

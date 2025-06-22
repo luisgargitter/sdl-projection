@@ -34,6 +34,7 @@ render_t render_init(SDL_Window *w, float_t fov) {
     if (r.objects == NULL)
         info_and_abort(NULL);
 
+    r.near = 0.00001;
     r.fov_ratio = tanf(fov / 2.0);
     r.scaled_fov = fminf(r.width, r.height) * r.fov_ratio;
 
@@ -77,7 +78,7 @@ void position_object(render_t *r, object_t *o) {
         v = mat3_mul(o->orientation, v);
         v = vec3_add(glob_offset, v);
         v = mat3_mul(r->orientation, v);
-        o->vertices_in_scene[j] = v;
+        array_set(o->vertices_in_scene, j, &v);
     }
 }
 
@@ -86,28 +87,30 @@ void project_object(render_t *r, object_t *o) {
     float centerx = (float)r->width / 2;
     float centery = (float)r->height / 2;
 
-    vec3_t *v = o->vertices_in_scene;
+    array_clear(o->projected);
 
-    for (int32_t i = 0; i < array_length(o->asset->vertices); i++) {
-        vec3_t vt = v[i];
+    for (int32_t i = 0; i < array_length(o->vertices_in_scene); i++) {
+        vec3_t vt = *(vec3_t *) array_at(o->vertices_in_scene, i);
         if (vt.z > 0) {
             v2 = vec2_mul(vec2(vt.x, vt.y), 1/vt.z);
         } else {
-            v2 = vec2(vt.x, vt.y);
+            v2 = vec2(0,0);
         }
 
-        SDL_Vertex *sv = array_at(o->projected, i);
-        sv->position.x = v2.x * r->scaled_fov + centerx;
-        sv->position.y = r->height - (v2.y * r->scaled_fov + centery);
+        SDL_Vertex sv;
+        sv.position.x = v2.x * r->scaled_fov + centerx;
+        sv.position.y = r->height - (v2.y * r->scaled_fov + centery);
+
+        array_push(o->projected, &sv);
     }
 }
 
 void fog_shader(object_t *o) {
-    for (int32_t i = 0; i < array_length(o->asset->vertices); i++) {
-        vec3_t *v = &o->vertices_in_scene[i];
+    for (int32_t i = 0; i < array_length(o->projected); i++) {
+        vec3_t *v = array_at(o->vertices_in_scene, i);
         SDL_Vertex *sv = array_at(o->projected, i);
         SDL_Color *c = &sv->color;
-        float distance = vec3_euclidean_distance(vec3_identity(), *v);
+        float distance = vec3_length(*v);
         float lightVal = powf(distance * 10, 1.5);
 
         c->r = (63 < lightVal) ? 63 : lightVal;
@@ -116,80 +119,159 @@ void fog_shader(object_t *o) {
     }
 }
 
+typedef struct {
+    float value;
+    int arg;
+} sortable_t;
+
 int compFaces(const void *f1, const void *f2) {
-    sortable_triangle *st1 = (sortable_triangle *)f1;
-    sortable_triangle *st2 = (sortable_triangle *)f2;
-    if (st1->farthest == st2->farthest)
+    sortable_t *st1 = (sortable_t *)f1;
+    sortable_t *st2 = (sortable_t *)f2;
+    if (st1->value == st2->value)
         return 0;
-    if (st1->farthest < st2->farthest)
+    if (st1->value < st2->value)
         return 1;
     return -1;
 }
 
-void sortFaces(object_t *obj) {
-    timsort(obj->vf_sortable, array_length(obj->asset->faces), sizeof(sortable_triangle),
-            compFaces);
-}
+void order_faces(render_t *r, object_t *o) {
+    array_t *order = array_new(sizeof(sortable_t));
 
-bool is_in_front_of_camera(object_t *o, sortable_triangle s) {
-    vec3_t *v = o->vertices_in_scene;
-    if (v[s.p1].z > 0)
-        return true;
-    if (v[s.p2].z > 0)
-        return true;
-    if (v[s.p3].z > 0)
-        return true;
-    return false;
-}
+    for (int32_t i = 0; i < array_length(o->visible_faces); i+=3) {
+        int32_t *surface = array_at(o->visible_faces, i);
+        float distance = 0;
+        for (int j = 0; j < 3; j++) {
+            vec3_t *v = array_at(o->vertices_in_scene, surface[j]);
 
-void determine_visible(render_t *r) {
-    for (int32_t i = 0; i < r->num_objects; i++) {
-        object_t *t = r->objects + i;
-        t->vf_count = 0;
-
-        for (int32_t f = 0; f < array_length(t->asset->faces); f++) {
-            sortable_triangle *st = &(t->vf_sortable[f]);
-            vec3_t *v = t->vertices_in_scene;
-            float_t dist1 = vec3_euclidean_distance(v[st->p1], vec3_identity());
-            float_t dist2 = vec3_euclidean_distance(v[st->p2], vec3_identity());
-            float_t dist3 = vec3_euclidean_distance(v[st->p3], vec3_identity());
-            float_t max = fmaxf(dist1, dist2);
-            max = fmaxf(max, dist3);
-            st->farthest = max;
+            distance = fmaxf(distance, vec3_length(*v));
         }
-        sortFaces(t);
-        for (int32_t f = 0; f < array_length(t->asset->faces); f++) {
-            sortable_triangle st = t->vf_sortable[f];
+        sortable_t s = {distance, i};
+        array_push(order, &s);
+    }
+    timsort(array_raw(order), array_length(order), sizeof(sortable_t), compFaces);
 
-            // Compute the Z component of the cross product of v1->v3 and v1->v2
-            SDL_Vertex *sv1 = array_at(t->projected, st.p1);
-            SDL_Vertex *sv2 = array_at(t->projected, st.p2);
-            SDL_Vertex *sv3 = array_at(t->projected, st.p3);
-            float zComp = ((sv3->position.x -
-                            sv1->position.x) // v1->v3's X coord
-                           * (sv2->position.y -
-                             sv1->position.y)) // v1->v2's Y coord
-                          -
-                          ((sv3->position.y -
-                            sv1->position.y) // v1->v3's Y coord
-                           * (sv2->position.x -
-                              sv1->position.x)); // v1->v2's X coord
+    array_clear(o->ordered_faces);
+    for (int32_t i = 0; i < array_length(order); i++) {
+        sortable_t *sortable = array_at(order, i);
+        uint32_t index = sortable->arg;
+        array_push(o->ordered_faces, array_at(o->visible_faces, index));
+        array_push(o->ordered_faces, array_at(o->visible_faces, index+1));
+        array_push(o->ordered_faces, array_at(o->visible_faces, index+2));
+    }
 
-            if (zComp < 0 &&
-                is_in_front_of_camera(
-                    t, st)) // If Z component of the normal vector is <0, that
-                            // means the face is pointing towards us
-            {
-                // So we add the current face to the array of visible, in the
-                // format that SDL wants
-                int32_t *temp = t->visible_faces + t->vf_count * 3;
-                temp[0] = t->vf_sortable[f].p1;
-                temp[1] = t->vf_sortable[f].p2;
-                temp[2] = t->vf_sortable[f].p3;
-                t->vf_count++;
+    array_free(order);
+    order = NULL;
+}
+
+bool is_in_front_of_camera(float fnear, object_t *o, surface_t s) {
+    vec3_t *v = array_raw(o->vertices_in_scene);
+    return (v[s.vertex[0]].z > fnear) && (v[s.vertex[1]].z > fnear) && (v[s.vertex[2]].z > fnear);
+}
+
+int frustum_culling(render_t *r, object_t *o) {
+    array_truncate(o->vertices_in_scene, array_length(o->asset->vertices));
+    array_clear(o->visible_faces);
+
+    for (uint32_t i = 0; i < array_length(o->asset->faces); i+=1) {
+        surface_t *surface = array_at(o->asset->faces, i);
+
+        if (is_in_front_of_camera(r->near, o, *surface)) {
+            array_push(o->visible_faces, &surface->vertex[0]);
+            array_push(o->visible_faces, &surface->vertex[1]);
+            array_push(o->visible_faces, &surface->vertex[2]);
+        } else {
+            int32_t vertices_surface[3];
+            vertices_surface[0] = surface->vertex[0];
+            vertices_surface[1] = surface->vertex[1];
+            vertices_surface[2] = surface->vertex[2];
+
+            vec3_t vt[3];
+            vt[0] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[0]);
+            vt[1] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[1]);
+            vt[2] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[2]);
+
+            int32_t behind = -1;
+            int32_t front = -1;
+            int32_t other = -1;
+            for (uint32_t j = 0; j < 3; j++) {
+                if (vt[j].z < r->near && behind == -1)
+                    behind = j;
+                else if (vt[j].z > r->near && front == -1)
+                    front = j;
+                else
+                    other = j;
+            }
+
+            if (front != -1) {
+                int32_t visible_surface[3];
+                visible_surface[behind] = array_length(o->vertices_in_scene);
+                visible_surface[front] = vertices_surface[front];
+                visible_surface[other] = vertices_surface[other];
+
+                float tt = (r->near - vt[behind].z) / (vt[front].z - vt[behind].z);
+                vec3_t mod_behind = vec3_add(vec3_mul(vt[behind], 1-tt), vec3_mul(vt[front], tt));
+
+                array_push(o->vertices_in_scene, &mod_behind);
+
+                if (vt[other].z > r->near) { // surface to quad
+                    int32_t additional_surface[3];
+                    additional_surface[other] = vertices_surface[other];
+                    additional_surface[front] = visible_surface[behind];
+                    additional_surface[behind] = array_length(o->vertices_in_scene);
+
+                    array_push(o->visible_faces, &additional_surface[0]);
+                    array_push(o->visible_faces, &additional_surface[1]);
+                    array_push(o->visible_faces, &additional_surface[2]);
+
+                    tt = (r->near - vt[behind].z) / (vt[other].z - vt[behind].z);
+                    vec3_t newv = vec3_add(vec3_mul(vt[behind], 1-tt), vec3_mul(vt[other], tt));
+
+                    array_push(o->vertices_in_scene, &newv);
+                } else {
+                    visible_surface[other] = array_length(o->vertices_in_scene);
+
+                    array_push(o->visible_faces, &visible_surface[0]);
+                    array_push(o->visible_faces, &visible_surface[1]);
+                    array_push(o->visible_faces, &visible_surface[2]);
+
+                    tt = (r->near- vt[other].z) / (vt[front].z - vt[other].z);
+                    vec3_t new_other = vec3_add(vec3_mul(vt[other], 1-tt), vec3_mul(vt[front], tt));
+
+                    array_push(o->vertices_in_scene, &new_other);
+                }
             }
         }
     }
+
+    return 0;
+}
+
+void cull_faces(render_t *r, object_t *o) {
+    array_t *visible_faces = array_new(sizeof(int32_t));
+    array_resize(visible_faces, array_length(o->visible_faces));
+
+    for (int i = 0; i < array_length(o->visible_faces); i+=3) {
+        int32_t *surface = array_at(o->visible_faces, i);
+        SDL_Vertex *v1 = array_at(o->projected, surface[0]);
+        SDL_Vertex *v2 = array_at(o->projected, surface[1]);
+        SDL_Vertex *v3 = array_at(o->projected, surface[2]);
+        vec2_t vv1 = vec2(v1->position.x, v1->position.y);
+        vec2_t vv2 = vec2(v2->position.x, v2->position.y);
+        vec2_t vv3 = vec2(v3->position.x, v3->position.y);
+
+        vec2_t edge1 = vec2_sub(vv2, vv1);
+        vec2_t edge2 = vec2_sub(vv3, vv1);
+        float z = vec2_cross(edge1, edge2);
+
+        if (z > 0) {
+            array_push(visible_faces, surface);
+            array_push(visible_faces, surface+1);
+            array_push(visible_faces, surface+2);
+        }
+    }
+
+    array_free(o->visible_faces);
+    o->visible_faces = visible_faces;
 }
 
 int display_scene(render_t *r) {
@@ -199,8 +281,8 @@ int display_scene(render_t *r) {
     for (int32_t i = 0; i < r->num_objects; i++) {
         object_t *t = r->objects + i;
 
-        int ret = SDL_RenderGeometry(r->r, NULL, array_raw(t->projected), array_length(t->asset->vertices),
-                                     t->visible_faces, t->vf_count * 3);
+        int ret = SDL_RenderGeometry(r->r, NULL, array_raw(t->projected), array_length(t->projected),
+                                     array_raw(t->ordered_faces), array_length(t->ordered_faces));
         if(ret < 0) info_and_abort(SDL_GetError());
     }
 
@@ -241,14 +323,16 @@ void render_objects(render_t *r) {
     for (int32_t i = 0; i < r->num_objects; i++) {
         object_t *o = r->objects + i;
         position_object(r, o);
+        frustum_culling(r, o);
+        order_faces(r, o);
         project_object(r, o);
+        cull_faces(r, o);
         fog_shader(o);
     }
 }
 
 int render_frame(render_t *r) {
     render_objects(r);
-    determine_visible(r);
     display_scene(r);
 
     fadenkreuz(r);

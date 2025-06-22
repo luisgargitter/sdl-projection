@@ -18,7 +18,7 @@ LFLAGS =
 # Flags for debug compilation
 # UNDEBUG	... undefines NDEBUG (enables asserts)
 # g			... keep debug symbols
-DCFLAGS = -UNDEBUG -g
+DCFLAGS = -UNDEBUG -DDEBUG -g
 DLFLAGS = -g			
 
 # Flags for production compilation

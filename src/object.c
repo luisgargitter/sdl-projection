@@ -12,25 +12,17 @@ int object_init(object_t *o, asset_t *a, mat3_t orientation, vec3_t offset) {
                     // when no longer in use
     o->asset = a;
     o->asset->ref_count++;
-    o->vf_count = 0;
     o->orientation = orientation;
     o->offset = offset;
 
-    o->vertices_in_scene =
-        malloc(sizeof(*o->vertices_in_scene) * array_length(o->asset->vertices));
+    o->vertices_in_scene = array_new(sizeof(vec3_t));
+    array_resize(o->vertices_in_scene, array_length(o->asset->vertices));
+
     o->projected = array_new(sizeof(SDL_Vertex));
     array_resize(o->projected, array_length(o->asset->vertices));
 
-    o->visible_faces =
-        malloc(sizeof(*o->visible_faces) * array_length(o->asset->faces) * 3);
-    o->vf_sortable = malloc(sizeof(sortable_triangle) * array_length(o->asset->faces));
-
-    for (int i = 0; i < array_length(o->asset->faces); i++) {
-        surface_t tsf = *(surface_t *) array_at(o->asset->faces, i);
-        o->vf_sortable[i].p1 = tsf.vertex[0];
-        o->vf_sortable[i].p2 = tsf.vertex[1];
-        o->vf_sortable[i].p3 = tsf.vertex[2];
-    }
+    o->visible_faces = array_new(sizeof(int32_t));
+    o->ordered_faces = array_new(sizeof(int32_t));
 
     return 0;
 }
@@ -42,14 +34,10 @@ void object_free(object_t *o) {
 
     free(o->vertices_in_scene);
     o->vertices_in_scene = NULL;
-    o->vf_count = 0;
 
-    free(o->projected);
+    array_free(o->projected);
     o->projected = NULL;
 
-    free(o->visible_faces);
+    array_free(o->visible_faces);
     o->visible_faces = NULL;
-
-    free(o->vf_sortable);
-    o->vf_sortable = NULL;
 }

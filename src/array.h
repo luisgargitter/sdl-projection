@@ -9,6 +9,8 @@ array_t *array_new(uint32_t size);
 void array_free(array_t *array);
 int32_t array_resize(array_t *array, uint32_t capacity);
 int32_t array_trim(array_t *array);
+void array_truncate(array_t *array, uint32_t length);
+void array_clear(array_t *array);
 uint32_t array_length(array_t *array);
 void * array_at(array_t *array, uint32_t index);
 void array_set(array_t *array, uint32_t index, void *element);

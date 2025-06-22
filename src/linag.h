@@ -1,6 +1,7 @@
 #ifndef SDL_PROJECTION_LINAG_H
 #define SDL_PROJECTION_LINAG_H
 
+#include "asset.h"
 #include "stdint.h"
 
 typedef struct {
@@ -15,16 +16,12 @@ typedef struct {
     float m[9];
 } mat3_t;
 
-typedef struct {
-    float farthest;
-    int p1, p2, p3;
-} sortable_triangle;
-
 vec2_t vec2(float x, float y);
 
 vec2_t vec2_add(vec2_t v1, vec2_t v2);
 vec2_t vec2_sub(vec2_t v1, vec2_t v2);
 vec2_t vec2_mul(vec2_t v, float c);
+float vec2_cross(vec2_t v1, vec2_t v2);
 
 mat3_t mat3_identity();
 
@@ -50,17 +47,6 @@ vec3_t vec3_mul(vec3_t v, float s);
 
 vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t);
 
-float vec3_euclidean_distance(vec3_t v1, vec3_t v2);
+float vec3_length(vec3_t v);
 
-// ----- GENERICS -----
-/*
-#define ladd(X, Y) _Generic((X), mat3_t: mat3_add, vec3_t: vec3_add)(X, Y)
-
-#define lsub(X, Y) _Generic((X), vec3_t: vec3_subtract)(X, Y)
-
-#define lmul(X, Y)                                                             \
-    _Generic((Y), mat3_t: mat3_matmul, vec3_t: mat3_apply)(X, Y)
-
-#define leud(X, Y) _Generic((X), vec3_t: vec3_euclidean_distance)(X, Y)
-*/
 #endif
