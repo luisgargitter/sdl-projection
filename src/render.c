@@ -170,8 +170,8 @@ bool is_in_front_of_camera(float fnear, object_t *o, surface_t s) {
 
 int frustum_culling(render_t *r, object_t *o) {
     array_truncate(o->vertices_in_scene, array_length(o->asset->vertices));
-    array_clear(o->visible_faces);
 
+    array_clear(o->visible_faces);
     for (uint32_t i = 0; i < array_length(o->asset->faces); i+=1) {
         surface_t *surface = array_at(o->asset->faces, i);
 
@@ -185,57 +185,56 @@ int frustum_culling(render_t *r, object_t *o) {
             vertices_surface[1] = surface->vertex[1];
             vertices_surface[2] = surface->vertex[2];
 
+            for (uint32_t j = 0; j < 3; j++) {
+                vec3_t *v1 = array_at(o->vertices_in_scene, vertices_surface[0]);
+                vec3_t *v2 = array_at(o->vertices_in_scene, vertices_surface[1]);
+                if (v1->z > r->near && v2->z < r->near)
+                    break;
+                int32_t vi = vertices_surface[0];
+                vertices_surface[0] = vertices_surface[2];
+                vertices_surface[2] = vertices_surface[1];
+                vertices_surface[1] = vi;
+            }
+
             vec3_t vt[3];
             vt[0] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[0]);
             vt[1] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[1]);
             vt[2] = *(vec3_t *) array_at(o->vertices_in_scene, vertices_surface[2]);
 
-            int32_t behind = -1;
-            int32_t front = -1;
-            int32_t other = -1;
-            for (uint32_t j = 0; j < 3; j++) {
-                if (vt[j].z < r->near && behind == -1)
-                    behind = j;
-                else if (vt[j].z > r->near && front == -1)
-                    front = j;
-                else
-                    other = j;
-            }
-
-            if (front != -1) {
+            if (vt[0].z > r->near) {
                 int32_t visible_surface[3];
-                visible_surface[behind] = array_length(o->vertices_in_scene);
-                visible_surface[front] = vertices_surface[front];
-                visible_surface[other] = vertices_surface[other];
+                visible_surface[0] = vertices_surface[0];
+                visible_surface[1] = array_length(o->vertices_in_scene);
+                visible_surface[2] = vertices_surface[2];
 
-                float tt = (r->near - vt[behind].z) / (vt[front].z - vt[behind].z);
-                vec3_t mod_behind = vec3_add(vec3_mul(vt[behind], 1-tt), vec3_mul(vt[front], tt));
+                float tt = (r->near - vt[1].z) / (vt[0].z - vt[1].z);
+                vec3_t mod_behind = vec3_add(vec3_mul(vt[1], 1-tt), vec3_mul(vt[0], tt));
 
                 array_push(o->vertices_in_scene, &mod_behind);
 
-                if (vt[other].z > r->near) { // surface to quad
+                if (vt[2].z > r->near) { // surface to quad
                     int32_t additional_surface[3];
-                    additional_surface[other] = vertices_surface[other];
-                    additional_surface[front] = visible_surface[behind];
-                    additional_surface[behind] = array_length(o->vertices_in_scene);
+                    additional_surface[0] = visible_surface[1];
+                    additional_surface[1] = array_length(o->vertices_in_scene);
+                    additional_surface[2] = vertices_surface[2];
 
                     array_push(o->visible_faces, &additional_surface[0]);
                     array_push(o->visible_faces, &additional_surface[1]);
                     array_push(o->visible_faces, &additional_surface[2]);
 
-                    tt = (r->near - vt[behind].z) / (vt[other].z - vt[behind].z);
-                    vec3_t newv = vec3_add(vec3_mul(vt[behind], 1-tt), vec3_mul(vt[other], tt));
+                    tt = (r->near - vt[1].z) / (vt[2].z - vt[1].z);
+                    vec3_t newv = vec3_add(vec3_mul(vt[1], 1-tt), vec3_mul(vt[2], tt));
 
                     array_push(o->vertices_in_scene, &newv);
                 } else {
-                    visible_surface[other] = array_length(o->vertices_in_scene);
+                    visible_surface[2] = array_length(o->vertices_in_scene);
 
                     array_push(o->visible_faces, &visible_surface[0]);
                     array_push(o->visible_faces, &visible_surface[1]);
                     array_push(o->visible_faces, &visible_surface[2]);
 
-                    tt = (r->near- vt[other].z) / (vt[front].z - vt[other].z);
-                    vec3_t new_other = vec3_add(vec3_mul(vt[other], 1-tt), vec3_mul(vt[front], tt));
+                    tt = (r->near- vt[2].z) / (vt[0].z - vt[2].z);
+                    vec3_t new_other = vec3_add(vec3_mul(vt[2], 1-tt), vec3_mul(vt[0], tt));
 
                     array_push(o->vertices_in_scene, &new_other);
                 }
