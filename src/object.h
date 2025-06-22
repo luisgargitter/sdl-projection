@@ -8,8 +8,9 @@ typedef struct {
     asset_t *asset;
     vec3_t offset;
     mat3_t orientation;
+
     vec3_t *vertices_in_scene;
-    SDL_Vertex *proj_v;
+    array_t *projected; // SDL_Vertex
     int32_t *visible_faces; // stored as int triplets
     sortable_triangle *vf_sortable;
     int32_t vf_count;

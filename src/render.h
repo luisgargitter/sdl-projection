@@ -15,6 +15,8 @@ typedef struct {
     SDL_Renderer *r;   ///< Pointer to the SDL_Renderer
     int32_t width;     ///< Window width
     int32_t height;    ///< Window height
+
+    float_t near, far; ///< For clipping
     float_t fov_ratio; ///< FOV as ratio of the width or height to the depth of
                        ///< the "camera"
     float_t scaled_fov;

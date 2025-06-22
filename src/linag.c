@@ -7,6 +7,26 @@
 
 #include <math.h>
 
+vec2_t vec2(float_t x, float_t y) {
+    vec2_t v = {x, y};
+    return v;
+}
+
+vec2_t vec2_add(vec2_t a, vec2_t b) {
+    vec2_t v = {a.x + b.x, a.y + b.y};
+    return v;
+}
+
+vec2_t vec2_sub(vec2_t a, vec2_t b) {
+    vec2_t v = {a.x - b.x, a.y - b.y};
+    return v;
+}
+
+vec2_t vec2_mul(vec2_t a, float c) {
+    vec2_t v = {a.x * c, a.y * c};
+    return v;
+}
+
 mat3_t mat3_identity() {
     mat3_t r = {{1, 0, 0, 0, 1, 0, 0, 0, 1}};
 
@@ -85,7 +105,7 @@ vec3_t vec3_subtract(vec3_t v1, vec3_t v2) {
     return r;
 }
 
-vec3_t vec3_scale(vec3_t v, float s) { return vec3(v.x * s, v.y * s, v.z * s); }
+vec3_t vec3_mul(vec3_t v, float s) { return vec3(v.x * s, v.y * s, v.z * s); }
 
 /** @brief returns the linear-interpolated Point between v1 and v2 that is part
  * t away from v1.
@@ -95,21 +115,11 @@ vec3_t vec3_scale(vec3_t v, float s) { return vec3(v.x * s, v.y * s, v.z * s); }
  * @return Point between v1 and v2.
  */
 vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t) {
-    return vec3_add(v1, vec3_scale(vec3_subtract(v2, v1), t));
+    return vec3_add(v1, vec3_mul(vec3_subtract(v2, v1), t));
 }
 
 float vec3_euclidean_distance(vec3_t v1, vec3_t v2) {
     vec3_t v = vec3_subtract(v1, v2);
     float len = powf(v.x, 2.0) + powf(v.y, 2.0) + powf(v.z, 2.0);
     return sqrtf(len);
-}
-
-vec2_t vec3_map_to_plane(vec3_t v) {
-    if (v.z > 0.0) {
-        vec2_t v2 = {v.x / v.z, v.y / v.z};
-        return v2;
-    }
-    // ----- pfusch!!! -----
-    vec2_t v2 = {v.x / 0.000001, v.y / 0.000001};
-    return v2;
 }

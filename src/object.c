@@ -18,7 +18,9 @@ int object_init(object_t *o, asset_t *a, mat3_t orientation, vec3_t offset) {
 
     o->vertices_in_scene =
         malloc(sizeof(*o->vertices_in_scene) * array_length(o->asset->vertices));
-    o->proj_v = malloc(sizeof(*o->proj_v) * array_length(o->asset->vertices));
+    o->projected = array_new(sizeof(SDL_Vertex));
+    array_resize(o->projected, array_length(o->asset->vertices));
+
     o->visible_faces =
         malloc(sizeof(*o->visible_faces) * array_length(o->asset->faces) * 3);
     o->vf_sortable = malloc(sizeof(sortable_triangle) * array_length(o->asset->faces));
@@ -42,8 +44,8 @@ void object_free(object_t *o) {
     o->vertices_in_scene = NULL;
     o->vf_count = 0;
 
-    free(o->proj_v);
-    o->proj_v = NULL;
+    free(o->projected);
+    o->projected = NULL;
 
     free(o->visible_faces);
     o->visible_faces = NULL;

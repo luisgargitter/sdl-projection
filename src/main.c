@@ -58,11 +58,12 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s: %s\n", argv[0], SDL_GetError());
         return EXIT_FAILURE;
     }
-
+    /*
     if (SDL_SetRelativeMouseMode(SDL_TRUE) == -1) {
         fprintf(stderr, "%s: %s\n", argv[0], SDL_GetError());
         return EXIT_FAILURE;
     }
+    */
 
     render_t render = render_init(window, FOV);
 

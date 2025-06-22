@@ -12,6 +12,7 @@
 
 #include "linag.h"
 #include "projection_error.h"
+#include "array.h"
 
 #define DEFAULT_VERTEX_COUNT 512
 #define DEFAULT_NORMAL_COUNT 512
@@ -126,7 +127,7 @@ int obj_proc_line(asset_t *asset, char *line) {
 void asset_load_obj(FILE *f, asset_t *a) {
     a->vertices = array_new(sizeof(vec3_t));
     a->normals = array_new(sizeof(vec3_t));
-    a->uvcoordinates = array_new(sizeof(vec2_t));
+    a->uv_coordinates = array_new(sizeof(vec2_t));
     a->faces = array_new(sizeof(surface_t));
 
     bool contains_vertex_normals = false;
@@ -147,8 +148,8 @@ void asset_load_obj(FILE *f, asset_t *a) {
         a->normals = NULL;
     }
     if (contains_texture_coordinates == false) {
-        array_free(a->uvcoordinates);
-        a->uvcoordinates = NULL;
+        array_free(a->uv_coordinates);
+        a->uv_coordinates = NULL;
     }
 }
 
@@ -157,8 +158,8 @@ void asset_free(asset_t *a) {
     a->vertices = NULL;
     array_free(a->normals);
     a->normals = NULL;
-    array_free(a->uvcoordinates);
-    a->uvcoordinates = NULL;
+    array_free(a->uv_coordinates);
+    a->uv_coordinates = NULL;
     array_free(a->faces);
     a->faces = NULL;
 }

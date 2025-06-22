@@ -48,7 +48,12 @@ int32_t array_resize(array_t *a, uint32_t length) {
     assert(length >= a->length);
 
     a->length = length;
-    a->capacity = a->length;
+
+    if (length == 0)
+        a->capacity = 1;
+    else
+        a->capacity = a->length;
+
     a->array = realloc(a->array, a->capacity * a->size);
     if (a->array == NULL) {
         free(a);
@@ -58,12 +63,18 @@ int32_t array_resize(array_t *a, uint32_t length) {
     return 0;
 }
 
+int32_t array_trim(array_t *a) {
+    assert(a != NULL);
+
+    return array_resize(a, array_length(a));
+}
+
 uint32_t array_length(array_t *a) {
     assert(a != NULL);
     return a->length;
 }
 
-char * array_at(array_t *a, uint32_t index) {
+void * array_at(array_t *a, uint32_t index) {
     assert(a != NULL);
     assert(index < a->length);
 

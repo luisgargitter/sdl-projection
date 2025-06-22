@@ -20,6 +20,12 @@ typedef struct {
     int p1, p2, p3;
 } sortable_triangle;
 
+vec2_t vec2(float x, float y);
+
+vec2_t vec2_add(vec2_t v1, vec2_t v2);
+vec2_t vec2_sub(vec2_t v1, vec2_t v2);
+vec2_t vec2_mul(vec2_t v, float c);
+
 mat3_t mat3_identity();
 
 mat3_t mat3_transpose(mat3_t matrix);
@@ -40,11 +46,9 @@ vec3_t vec3_add(vec3_t v1, vec3_t v2);
 
 vec3_t vec3_subtract(vec3_t v1, vec3_t v2);
 
-vec3_t vec3_scale(vec3_t v, float s);
+vec3_t vec3_mul(vec3_t v, float s);
 
 vec3_t vec3_lerp(vec3_t v1, vec3_t v2, float t);
-
-vec2_t vec3_map_to_plane(vec3_t v);
 
 float vec3_euclidean_distance(vec3_t v1, vec3_t v2);
 

@@ -14,9 +14,9 @@
  */
 
 typedef struct {
-    int32_t vertex[3];  ///< vertex indices
-    int32_t normal[3];  ///< vertex normal indices of corresponding vertex
-    int32_t texture[3]; ///< vertex texture indices of corresponding vertex
+    uint32_t vertex[3];  ///< vertex indices
+    uint32_t normal[3];  ///< vertex normal indices of corresponding vertex
+    uint32_t texture[3]; ///< vertex texture indices of corresponding vertex
 } surface_t;
 
 typedef struct {
@@ -25,7 +25,7 @@ typedef struct {
 
     array_t *vertices;
     array_t *normals;
-    array_t *uvcoordinates;
+    array_t *uv_coordinates;
     array_t *faces;
 
     SDL_Texture *t; ///< (optional)
